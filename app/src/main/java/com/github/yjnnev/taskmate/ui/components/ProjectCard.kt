@@ -1,6 +1,7 @@
 package com.github.yjnnev.taskmate.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -11,83 +12,133 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.yjnnev.taskmate.R
+import com.github.yjnnev.taskmate.classes.Project
+import com.github.yjnnev.taskmate.classes.ProjectCategory
 
 @Composable
 fun ProjectCard(
-    title: String,
-    subtitle: String,
-    memberCount: Int,
-    completedTasks: Int,
-    totalTasks: Int
+    project: Project,
+    onClick: () -> Unit = {}
 ) {
-    val isCompleted = completedTasks == totalTasks
-    val progress = if (totalTasks > 0) completedTasks.toFloat() / totalTasks.toFloat() else 0f
-
-    // Checkmark color logic: Green if all tasks are done, else gray
+    val isCompleted = project.completedTasks == project.totalTasks && project.totalTasks > 0
+    val progress = if (project.totalTasks > 0) project.completedTasks.toFloat() / project.totalTasks.toFloat() else 0f
     val checkmarkColor = if (isCompleted) Color(0xFF4CAF50) else Color.LightGray
 
-    // Pad Spacing around the card
-    Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+    Box(
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable { onClick() }  // Added clickable modifier
+    ) {
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White // Card Background
-            ),
-            shape = RoundedCornerShape(16.dp), // Border radius
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(
-                defaultElevation = 4.dp, // Add elevation for card shadow effect
-                pressedElevation = 8.dp // Elevation when pressed
+                defaultElevation = 4.dp,
+                pressedElevation = 8.dp
             )
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                // Row 1: Icon, Title, Subtitle
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                // Icon, Title, and Category Badge Row
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    // Icon Container - Fixed size
                     Box(
                         modifier = Modifier
                             .size(52.dp)
                             .background(
-                                Color(0xFFEBF4FF),
-                                RoundedCornerShape(12.dp) // More rounded corners
+                                project.category.color.copy(alpha = 0.1f),
+                                RoundedCornerShape(12.dp)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_ghost),
+                            imageVector = project.category.icon,
                             contentDescription = "Project Icon",
                             modifier = Modifier.size(28.dp),
-                            tint = Color(0xFF1E88E5)
+                            tint = project.category.color
                         )
                     }
+
                     Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text(
-                            text = title,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = Color(0xFF1A1A1A)
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = subtitle,
-                            fontSize = 14.sp,
-                            color = Color(0xFF6B7280)
-                        )
+
+                    // Title and Category - Responsive layout
+                    BoxWithConstraints(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        val maxWidth = maxWidth
+
+                        Column {
+                            Text(
+                                text = project.title,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = if (maxWidth < 240.dp) 16.sp else 18.sp,
+                                color = Color(0xFF1A1A1A)
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                CategoryBadge(category = project.category)
+
+                                // Owner chip
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .background(
+                                            Color(0xFFF3F4F6),
+                                            RoundedCornerShape(6.dp)
+                                        )
+                                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_ghost),
+                                        contentDescription = "Owner",
+                                        modifier = Modifier.size(12.dp),
+                                        tint = Color(0xFF6B7280)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = project.owner.username,
+                                        fontSize = 10.sp,
+                                        color = Color(0xFF6B7280),
+                                        fontWeight = FontWeight.Medium,
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp)) 
+                // Description if available
+                if (project.description.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = project.description,
+                        fontSize = 13.sp,
+                        color = Color(0xFF6B7280),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
 
-                // Row 2: Checkmark, Member Count, Task Count
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Status and stats row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // Checkmark and Status
+                    // Status indicator
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
@@ -110,13 +161,13 @@ fun ProjectCard(
                             text = if (isCompleted) "Completed" else "In Progress",
                             fontSize = 13.sp,
                             color = checkmarkColor,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1
                         )
                     }
 
-                    // Members and Tasks Count
+                    // Members and Tasks
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        // Members section
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_ghost),
@@ -126,14 +177,14 @@ fun ProjectCard(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "$memberCount",
+                                text = "${project.memberCount}",
                                 fontSize = 13.sp,
                                 color = Color(0xFF6B7280),
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1
                             )
                         }
 
-                        // Divider between members and tasks
                         Box(
                             modifier = Modifier
                                 .padding(horizontal = 12.dp)
@@ -142,25 +193,25 @@ fun ProjectCard(
                                 .background(Color(0xFFE5E7EB))
                         )
 
-                        // Tasks section
                         Text(
-                            text = "$completedTasks/$totalTasks Tasks",
+                            text = "${project.completedTasks}/${project.totalTasks} Tasks",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = Color(0xFF1A1A1A)
+                            color = Color(0xFF1A1A1A),
+                            maxLines = 1
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Row 3: Progress Bar
+                // Progress bar
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp),
-                    color = if (isCompleted) Color(0xFF4CAF50) else Color(0xFF1E88E5),
+                    color = if (isCompleted) Color(0xFF4CAF50) else project.category.color,
                     trackColor = Color(0xFFF3F4F6),
                     strokeCap = StrokeCap.Round,
                 )
@@ -169,12 +220,19 @@ fun ProjectCard(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun ProjectCardPreview(){
-    Column(modifier = Modifier.padding(16.dp)) {
-        ProjectCard("Project Alpha", "Mobile App Development", 3, 2, 5)
-        Spacer(modifier = Modifier.height(12.dp))
-        ProjectCard("Project Beta", "Web Design Sprint", 5, 8, 8) // Completed project example
+fun CategoryBadge(category: ProjectCategory) {
+    Surface(
+        shape = RoundedCornerShape(6.dp),
+        color = category.color.copy(alpha = 0.1f)
+    ) {
+        Text(
+            text = category.displayName,
+            fontSize = 10.sp,
+            color = category.color,
+            fontWeight = FontWeight.Medium,
+            maxLines = 1,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+        )
     }
 }
