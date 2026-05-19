@@ -66,6 +66,10 @@ class TaskMateRepository(
         return taskDao.observeTasksByProject(projectId)
     }
 
+    fun observeUserTasks(userId: String): Flow<List<TaskEntity>> {
+        return taskDao.observeTasksAssignedToUser(userId)
+    }
+
     suspend fun assignTask(taskId: String, userId: String?) {
         taskDao.assignTask(taskId, userId)
     }

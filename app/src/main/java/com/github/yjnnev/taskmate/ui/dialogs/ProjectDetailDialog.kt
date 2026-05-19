@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,20 +35,21 @@ import java.time.format.DateTimeFormatter
 fun ProjectDetailDialog(
     project: Project,
     currentUser: User,
+    tasks: List<Task>,
     onDismiss: () -> Unit,
     onEditProject: (Project) -> Unit,
     onInviteMembers: (Project) -> Unit,
-    onTaskCreated: (Task) -> Unit = {}
+    onViewMembers: (Project) -> Unit = {},
+    onAssignTask: (Task) -> Unit = {},
+    onTaskCreated: (Task) -> Unit = {},
+    onTaskStatusChange: (Task, TaskStatus) -> Unit = { _, _ -> }
 ) {
     var showAllTasks by remember { mutableStateOf(false) }
     var showCreateTaskDialog by remember { mutableStateOf(false) }
 
-    // Tasks state - starting with empty list as requested
-    var tasks by remember { mutableStateOf(emptyList<Task>()) }
-
     val isOwner = project.owner.email == currentUser.email
-    val currentTotalTasks = project.totalTasks + tasks.size
-    val currentCompletedTasks = project.completedTasks + tasks.count { it.status == TaskStatus.COMPLETED }
+    val currentTotalTasks = tasks.size
+    val currentCompletedTasks = tasks.count { it.status == TaskStatus.COMPLETED }
     
     val isCompleted = currentTotalTasks > 0 && currentCompletedTasks == currentTotalTasks
     val progress = if (currentTotalTasks > 0)
@@ -103,8 +105,8 @@ fun ProjectDetailDialog(
                     item {
                         QuickActionsSection(
                             onInviteMembers = { onInviteMembers(project) },
-                            onAddTask = { showCreateTaskDialog = true },
-                            onViewAllTasks = { showAllTasks = !showAllTasks }
+                            onViewMembers = { onViewMembers(project) },
+                            onAddTask = { showCreateTaskDialog = true }
                         )
                     }
 
@@ -151,7 +153,14 @@ fun ProjectDetailDialog(
                         }
                     } else {
                         items(displayTasks) { task ->
-                            TaskItem(task = task)
+                            TaskItem(
+                                task = task,
+                                isOwner = isOwner,
+                                onStatusChange = { newStatus ->
+                                    onTaskStatusChange(task, newStatus)
+                                },
+                                onAssignTask = { onAssignTask(task) }
+                            )
                         }
                     }
 
@@ -168,7 +177,6 @@ fun ProjectDetailDialog(
                 projectId = project.id,
                 onDismiss = { showCreateTaskDialog = false },
                 onCreate = { newTask ->
-                    tasks = tasks + newTask
                     onTaskCreated(newTask)
                     showCreateTaskDialog = false
                 }
@@ -386,51 +394,78 @@ private fun StatItem(label: String, value: String) {
 @Composable
 private fun QuickActionsSection(
     onInviteMembers: () -> Unit,
-    onAddTask: () -> Unit,
-    onViewAllTasks: () -> Unit
+    onViewMembers: () -> Unit,
+    onAddTask: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        // Members button
+        OutlinedButton(
+            onClick = onViewMembers,
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = Color(0xFF102A43)
+            ),
+            contentPadding = PaddingValues(horizontal = 4.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Group,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "Members",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        // Invite button
         OutlinedButton(
             onClick = onInviteMembers,
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = Color(0xFF102A43)
-            )
+            ),
+            contentPadding = PaddingValues(horizontal = 4.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.PersonAdd,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp)
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = "Invite",
-                fontSize = 14.sp,
+                fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold
             )
         }
 
+        // Add Task button
         Button(
             onClick = onAddTask,
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF102A43)
-            )
+            ),
+            contentPadding = PaddingValues(horizontal = 4.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp)
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = "Add Task",
-                fontSize = 14.sp,
+                text = "Task",
+                fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold
             )
         }
@@ -458,7 +493,12 @@ private fun DescriptionSection(description: String) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun TaskItem(task: Task) {
+private fun TaskItem(
+    task: Task,
+    isOwner: Boolean,
+    onStatusChange: (TaskStatus) -> Unit,
+    onAssignTask: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -472,18 +512,17 @@ private fun TaskItem(task: Task) {
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Status Indicator
-            Box(
-                modifier = Modifier
-                    .size(12.dp)
-                    .clip(CircleShape)
-                    .background(
-                        when (task.status) {
-                            TaskStatus.COMPLETED -> Color(0xFF4CAF50)
-                            TaskStatus.IN_PROGRESS -> Color(0xFFF59E0B)
-                            TaskStatus.TODO -> Color(0xFF9CA3AF)
-                        }
-                    )
+            // Checkbox for ticking tasks
+            Checkbox(
+                checked = task.status == TaskStatus.COMPLETED,
+                onCheckedChange = { checked ->
+                    onStatusChange(if (checked) TaskStatus.COMPLETED else TaskStatus.TODO)
+                },
+                colors = CheckboxDefaults.colors(
+                    checkedColor = Color(0xFF4CAF50),
+                    uncheckedColor = Color(0xFF9CA3AF)
+                ),
+                modifier = Modifier.size(24.dp)
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -493,9 +532,10 @@ private fun TaskItem(task: Task) {
                     text = task.title,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF1A1A1A),
+                    color = if (task.status == TaskStatus.COMPLETED) Color.Gray else Color(0xFF1A1A1A),
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    textDecoration = if (task.status == TaskStatus.COMPLETED) TextDecoration.LineThrough else null
                 )
 
                 if (task.description.isNotBlank()) {
@@ -536,8 +576,24 @@ private fun TaskItem(task: Task) {
                 }
             }
 
-            // Status Badge
-            StatusBadge(status = task.status)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (isOwner) {
+                    IconButton(
+                        onClick = onAssignTask,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AssignmentInd,
+                            contentDescription = "Assign Task",
+                            tint = Color(0xFF102A43),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
+                // Status Badge
+                StatusBadge(status = task.status)
+            }
         }
     }
 }

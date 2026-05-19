@@ -23,6 +23,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -52,7 +53,7 @@ import com.github.yjnnev.taskmate.ui.theme.TaskMateTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateProjectDialog(
-    currentUser: User,
+    currentUser: User?,
     onDismiss: () -> Unit,
     onCreate: (Project) -> Unit
 ) {
@@ -60,7 +61,7 @@ fun CreateProjectDialog(
     var description by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(ProjectCategory.WORK) }
 
-    val isValid = title.isNotBlank() && description.isNotBlank()
+    val isValid = title.isNotBlank() && description.isNotBlank() && currentUser != null
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -172,13 +173,15 @@ fun CreateProjectDialog(
                 // Create Button
                 Button(
                     onClick = {
-                        val project = Project(
-                            title = title,
-                            description = description,
-                            category = selectedCategory,
-                            owner = currentUser
-                        )
-                        onCreate(project)
+                        currentUser?.let { user ->
+                            val project = Project(
+                                title = title,
+                                description = description,
+                                category = selectedCategory,
+                                owner = user
+                            )
+                            onCreate(project)
+                        }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -191,11 +194,19 @@ fun CreateProjectDialog(
                         disabledContentColor = Color(0xFF9CA3AF)
                     )
                 ) {
-                    Text(
-                        text = "Create Project",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    if (currentUser == null) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.Gray,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = "Create Project",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
         }

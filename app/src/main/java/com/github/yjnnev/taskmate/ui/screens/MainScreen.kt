@@ -1,5 +1,7 @@
 package com.github.yjnnev.taskmate.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +21,7 @@ import com.github.yjnnev.taskmate.ui.components.EmptyState
 import com.github.yjnnev.taskmate.ui.components.Header
 import com.github.yjnnev.taskmate.ui.navigation.Screen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen() {
     // 1. Create the NavController
@@ -56,15 +59,7 @@ fun MainScreen() {
                 )
         ) {
             composable(Screen.Tasks.route) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    EmptyState(
-                        title = "No Tasks Yet",
-                        subtitle = "Your daily tasks will appear here. Start by creating a new one!",
-                        buttonText = "Add Task",
-                        iconRes = R.drawable.ic_ghost,
-                        onActionClick = { /* TODO */ }
-                    )
-                }
+                TasksScreen()
             }
             composable(Screen.Projects.route) {
                 ProjectsScreenContainer()

@@ -14,27 +14,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.yjnnev.taskmate.classes.Project
 import com.github.yjnnev.taskmate.classes.User
 import com.github.yjnnev.taskmate.ui.dialogs.CreateProjectDialog
 import com.github.yjnnev.taskmate.ui.components.EmptyState
 import com.github.yjnnev.taskmate.ui.components.ProjectCard
 import com.github.yjnnev.taskmate.ui.dialogs.ProjectDetailDialog
+import com.github.yjnnev.taskmate.ui.viewmodel.TaskMateViewModel
 import com.github.yjnnev.taskmate.R
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ProjectsScreenContainer() {
+fun ProjectsScreenContainer(
+    viewModel: TaskMateViewModel = viewModel()
+) {
     var showCreateDialog by remember { mutableStateOf(false) }
     var selectedProject by remember { mutableStateOf<Project?>(null) }
 
-    val currentUser = remember {
-        User(name = "Axel V", email = "axel.v@example.com")
-    }
-
-    var activeProjects by remember {
-        mutableStateOf(emptyList<Project>())
-    }
+    val currentUser by viewModel.currentUser.collectAsState()
+    val activeProjects by viewModel.projects.collectAsState()
 
     Column(
         modifier = Modifier
@@ -43,7 +42,7 @@ fun ProjectsScreenContainer() {
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Button row - always visible
+        // Button row - always visible with equal sizes
         ButtonRow(
             onSync = { /* TODO: Sync */ },
             onNewProject = { showCreateDialog = true },
@@ -54,13 +53,18 @@ fun ProjectsScreenContainer() {
 
         // Content - either empty state or projects list
         if (activeProjects.isEmpty()) {
-            EmptyState(
-                title = "No Active Projects",
-                subtitle = "Start by creating your first project to manage tasks.",
-                buttonText = "Create Project",
-                iconRes = R.drawable.ic_ghost,
-                onActionClick = { showCreateDialog = true }
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                EmptyState(
+                    title = "No Active Projects",
+                    subtitle = "Start by creating your first project to manage tasks.",
+                    buttonText = "Create Project",
+                    iconRes = R.drawable.ic_ghost,
+                    onActionClick = { showCreateDialog = true }
+                )
+            }
         } else {
             ProjectsList(
                 projects = activeProjects,
@@ -75,31 +79,42 @@ fun ProjectsScreenContainer() {
             currentUser = currentUser,
             onDismiss = { showCreateDialog = false },
             onCreate = { project ->
-                activeProjects = activeProjects + project
+                viewModel.createProject(project)
                 showCreateDialog = false
             }
         )
     }
 
     if (selectedProject != null) {
-        ProjectDetailDialog(
-            project = selectedProject!!,
-            currentUser = currentUser,
-            onDismiss = { selectedProject = null },
-            onEditProject = { project ->
-                selectedProject = null
-            },
-            onInviteMembers = { project ->
-                // TODO: Implement invite members feature
-            },
-            onTaskCreated = { newTask ->
-                activeProjects = activeProjects.map { p ->
-                    if (p.id == selectedProject?.id) {
-                        p.copy(totalTasks = p.totalTasks + 1)
-                    } else p
+        val user = currentUser
+        if (user != null) {
+            val projectTasks by viewModel.getProjectTasks(selectedProject!!.id).collectAsState(initial = emptyList())
+
+            ProjectDetailDialog(
+                project = selectedProject!!,
+                currentUser = user,
+                tasks = projectTasks,
+                onDismiss = { selectedProject = null },
+                onEditProject = { project ->
+                    selectedProject = null
+                },
+                onInviteMembers = { project ->
+                    // TODO: Implement invite members feature
+                },
+                onViewMembers = { project ->
+                    // TODO: Implement view members feature
+                },
+                onAssignTask = { task ->
+                    // TODO: Implement assign task feature
+                },
+                onTaskCreated = { newTask ->
+                    viewModel.createTask(newTask)
+                },
+                onTaskStatusChange = { task, newStatus ->
+                    viewModel.updateTaskStatus(task, newStatus)
                 }
-            }
-        )
+            )
+        }
     }
 }
 
@@ -114,41 +129,63 @@ fun ButtonRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        OutlinedButton(
+        Button(
             onClick = onSync,
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(8.dp)
+            modifier = Modifier
+                .weight(1f)
+                .height(48.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color.Black
+            ),
+            shape = RoundedCornerShape(8.dp),
+            border = ButtonDefaults.outlinedButtonBorder,
+            contentPadding = PaddingValues(0.dp)  // Remove default padding
         ) {
             Text(
                 text = "Sync",
-                color = Color.Black,
-                fontSize = 13.sp
+                fontSize = 13.sp,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
 
         Button(
             onClick = onNewProject,
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF102A43)),
-            modifier = Modifier.weight(1.2f),
-            shape = RoundedCornerShape(8.dp)
+            modifier = Modifier
+                .weight(1f)
+                .height(48.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF102A43),
+                disabledContainerColor = Color(0xFFE5E7EB)
+            ),
+            shape = RoundedCornerShape(8.dp),
+            contentPadding = PaddingValues(0.dp)  // Remove default padding
         ) {
             Text(
                 text = "New Project",
                 color = Color.White,
-                fontSize = 13.sp
+                fontSize = 13.sp,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
 
         Button(
             onClick = onJoinProject,
+            modifier = Modifier
+                .weight(1f)
+                .height(48.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF102A43)),
-            modifier = Modifier.weight(1.2f),
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(8.dp),
+            contentPadding = PaddingValues(0.dp)  // Remove default padding
         ) {
             Text(
                 text = "Join Project",
                 color = Color.White,
-                fontSize = 13.sp
+                fontSize = 13.sp,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
     }

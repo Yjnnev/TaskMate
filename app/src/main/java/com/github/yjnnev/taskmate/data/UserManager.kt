@@ -17,6 +17,15 @@ object UserManager {
     private val _currentUserId = MutableStateFlow<String?>(null)
     val currentUserId: StateFlow<String?> = _currentUserId.asStateFlow()
 
+    init {
+        // Automatically sign in a default user for now if none exists
+        scope.launch {
+            if (_currentUserId.value == null) {
+                signInWithEmail("guest@taskmate.com", "password")
+            }
+        }
+    }
+
     val currentUser: StateFlow<User?> = _currentUserId
         .flatMapLatest { userId ->
             if (userId != null) {
