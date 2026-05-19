@@ -30,7 +30,9 @@ object UserManager {
         .stateIn(scope, SharingStarted.WhileSubscribed(5000), null)
 
     fun getInitials(name: String): String {
+        if (name.isBlank()) return "?"
         return name.split(" ")
+            .filter { it.isNotBlank() }
             .take(2)
             .map { it.first().uppercase() }
             .joinToString("")

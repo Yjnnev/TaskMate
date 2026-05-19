@@ -5,7 +5,10 @@ data class Project(
     val title: String = "",
     val description: String = "",
     val category: ProjectCategory = ProjectCategory.WORK,
-    val ownerId: String = "",
+    val owner: User = User(),
+    val memberCount: Int = 1,
+    val completedTasks: Int = 0,
+    val totalTasks: Int = 0,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )

@@ -11,7 +11,6 @@ sealed class Screen(
     val iconVector: ImageVector? = null
 ) {
     object Tasks : Screen("tasks", "Tasks", iconRes = R.drawable.ic_ghost)
-    object Reviews : Screen("reviews", "Reviews", iconRes = R.drawable.ic_ghost)
     object Projects : Screen("projects", "Projects", iconRes = R.drawable.ic_ghost)
 
     // Easy to add new screens:
@@ -19,6 +18,6 @@ sealed class Screen(
     // object Profile : Screen("profile", "Profile", iconRes = R.drawable.ic_profile)
 
     companion object {
-        val bottomNavItems get() = listOf(Tasks, Reviews, Projects)
+        val bottomNavItems get() = listOf(Tasks, Projects)
     }
 }

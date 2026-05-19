@@ -3,8 +3,7 @@ package com.github.yjnnev.taskmate.data.local
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.room.TypeConverter
-import com.github.yjnnev.taskmate.classes.TaskStatus
-import com.github.yjnnev.taskmate.data.*
+import com.github.yjnnev.taskmate.classes.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

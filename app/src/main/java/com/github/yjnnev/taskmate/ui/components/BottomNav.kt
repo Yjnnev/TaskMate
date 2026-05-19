@@ -140,7 +140,5 @@ fun PreviewBottomNav() {
     // Preview showing different states
     Column {
         BottomNav(currentRoute = "tasks", onNavigate = {})
-        Spacer(modifier = Modifier.height(20.dp))
-        BottomNav(currentRoute = "reviews", onNavigate = {})
     }
 }

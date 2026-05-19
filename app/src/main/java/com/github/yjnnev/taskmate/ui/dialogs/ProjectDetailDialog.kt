@@ -36,41 +36,22 @@ fun ProjectDetailDialog(
     currentUser: User,
     onDismiss: () -> Unit,
     onEditProject: (Project) -> Unit,
-    onInviteMembers: (Project) -> Unit
+    onInviteMembers: (Project) -> Unit,
+    onTaskCreated: (Task) -> Unit = {}
 ) {
     var showAllTasks by remember { mutableStateOf(false) }
+    var showCreateTaskDialog by remember { mutableStateOf(false) }
 
-    // Sample tasks - in a real app, these would come from your data layer
-    val tasks = remember {
-        listOf(
-            Task(
-                title = "Design database schema",
-                description = "Create ERD and normalize tables",
-                status = TaskStatus.COMPLETED,
-                dueDate = LocalDate.now().plusDays(3),
-                priority = PriorityLevel.HIGH
-            ),
-            Task(
-                title = "Implement authentication",
-                description = "Set up Firebase Auth with email/password",
-                status = TaskStatus.IN_PROGRESS,
-                dueDate = LocalDate.now().plusDays(5),
-                priority = PriorityLevel.URGENT
-            ),
-            Task(
-                title = "Create API endpoints",
-                description = "RESTful endpoints for CRUD operations",
-                status = TaskStatus.TODO,
-                dueDate = LocalDate.now().plusDays(7),
-                priority = PriorityLevel.MEDIUM
-            )
-        )
-    }
+    // Tasks state - starting with empty list as requested
+    var tasks by remember { mutableStateOf(emptyList<Task>()) }
 
     val isOwner = project.owner.email == currentUser.email
-    val isCompleted = project.completedTasks == project.totalTasks && project.totalTasks > 0
-    val progress = if (project.totalTasks > 0)
-        project.completedTasks.toFloat() / project.totalTasks.toFloat() else 0f
+    val currentTotalTasks = project.totalTasks + tasks.size
+    val currentCompletedTasks = project.completedTasks + tasks.count { it.status == TaskStatus.COMPLETED }
+    
+    val isCompleted = currentTotalTasks > 0 && currentCompletedTasks == currentTotalTasks
+    val progress = if (currentTotalTasks > 0)
+        currentCompletedTasks.toFloat() / currentTotalTasks.toFloat() else 0f
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -108,13 +89,21 @@ fun ProjectDetailDialog(
                 ) {
                     // Progress Section
                     item {
-                        ProgressSection(project = project, progress = progress, isCompleted = isCompleted)
+                        ProgressSection(
+                            project = project.copy(
+                                totalTasks = currentTotalTasks,
+                                completedTasks = currentCompletedTasks
+                            ),
+                            progress = progress,
+                            isCompleted = isCompleted
+                        )
                     }
 
                     // Quick Actions
                     item {
                         QuickActionsSection(
                             onInviteMembers = { onInviteMembers(project) },
+                            onAddTask = { showCreateTaskDialog = true },
                             onViewAllTasks = { showAllTasks = !showAllTasks }
                         )
                     }
@@ -134,7 +123,7 @@ fun ProjectDetailDialog(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Tasks (${project.completedTasks}/${project.totalTasks})",
+                                text = "Tasks ($currentCompletedTasks/$currentTotalTasks)",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF1A1A1A)
@@ -151,8 +140,19 @@ fun ProjectDetailDialog(
 
                     // Task List
                     val displayTasks = if (showAllTasks) tasks else tasks.take(3)
-                    items(displayTasks) { task ->
-                        TaskItem(task = task)
+                    if (displayTasks.isEmpty()) {
+                        item {
+                            Text(
+                                text = "No tasks yet. Tap 'Add Task' to start.",
+                                fontSize = 14.sp,
+                                color = Color.Gray,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                    } else {
+                        items(displayTasks) { task ->
+                            TaskItem(task = task)
+                        }
                     }
 
                     // Bottom spacer
@@ -161,6 +161,18 @@ fun ProjectDetailDialog(
                     }
                 }
             }
+        }
+
+        if (showCreateTaskDialog) {
+            CreateTaskDialog(
+                projectId = project.id,
+                onDismiss = { showCreateTaskDialog = false },
+                onCreate = { newTask ->
+                    tasks = tasks + newTask
+                    onTaskCreated(newTask)
+                    showCreateTaskDialog = false
+                }
+            )
         }
     }
 }
@@ -374,6 +386,7 @@ private fun StatItem(label: String, value: String) {
 @Composable
 private fun QuickActionsSection(
     onInviteMembers: () -> Unit,
+    onAddTask: () -> Unit,
     onViewAllTasks: () -> Unit
 ) {
     Row(
@@ -402,7 +415,7 @@ private fun QuickActionsSection(
         }
 
         Button(
-            onClick = onViewAllTasks,
+            onClick = onAddTask,
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
@@ -410,13 +423,13 @@ private fun QuickActionsSection(
             )
         ) {
             Icon(
-                imageVector = Icons.Default.List,
+                imageVector = Icons.Default.Add,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "All Tasks",
+                text = "Add Task",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold
             )

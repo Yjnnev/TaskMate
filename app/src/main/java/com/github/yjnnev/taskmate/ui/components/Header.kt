@@ -101,9 +101,9 @@ fun Header() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Avatar
-                if (currentUser.profilePictureUrl != null) {
+                if (currentUser?.profilePictureUrl != null) {
                     AsyncImage(
-                        model = currentUser.profilePictureUrl,
+                        model = currentUser?.profilePictureUrl,
                         contentDescription = "Profile Picture",
                         modifier = Modifier
                             .size(36.dp)
@@ -126,7 +126,7 @@ fun Header() {
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = UserManager.getInitials(currentUser.name),
+                            text = UserManager.getInitials(currentUser?.name ?: ""),
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp
@@ -137,7 +137,7 @@ fun Header() {
                 Spacer(modifier = Modifier.width(10.dp))
 
                 Text(
-                    text = currentUser.username.ifEmpty { "User" },
+                    text = currentUser?.username?.ifEmpty { "User" } ?: "Guest",
                     color = Color(0xFF1E293B),
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp,
@@ -159,9 +159,9 @@ fun Header() {
     }
 
     // Side Panel
-    if (showSidePanel) {
+    if (showSidePanel && currentUser != null) {
         SidePanel(
-            currentUser = currentUser,
+            currentUser = currentUser!!,
             onDismiss = { showSidePanel = false }
         )
     }

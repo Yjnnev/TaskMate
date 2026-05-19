@@ -1,5 +1,7 @@
 package com.github.yjnnev.taskmate.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,7 +15,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.yjnnev.taskmate.classes.Project
-import com.github.yjnnev.taskmate.classes.ProjectCategory
 import com.github.yjnnev.taskmate.classes.User
 import com.github.yjnnev.taskmate.ui.dialogs.CreateProjectDialog
 import com.github.yjnnev.taskmate.ui.components.EmptyState
@@ -21,6 +22,7 @@ import com.github.yjnnev.taskmate.ui.components.ProjectCard
 import com.github.yjnnev.taskmate.ui.dialogs.ProjectDetailDialog
 import com.github.yjnnev.taskmate.R
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProjectsScreenContainer() {
     var showCreateDialog by remember { mutableStateOf(false) }
@@ -31,88 +33,9 @@ fun ProjectsScreenContainer() {
     }
 
     var activeProjects by remember {
-        mutableStateOf(
-            listOf(
-                Project(
-                    title = "Database Systems",
-                    description = "Managing complex database structures",
-                    category = ProjectCategory.WORK,
-                    owner = currentUser,
-                    memberCount = 3,
-                    completedTasks = 2,
-                    totalTasks = 5
-                ),
-                Project(
-                    title = "Mobile Development",
-                    description = "Android app for task management",
-                    category = ProjectCategory.PERSONAL,
-                    owner = currentUser,
-                    memberCount = 2,
-                    completedTasks = 2,
-                    totalTasks = 2
-                )
-            )
-        )
+        mutableStateOf(emptyList<Project>())
     }
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        if (activeProjects.isEmpty()) {
-            EmptyState(
-                title = "No Active Projects",
-                subtitle = "Select or join a project to view and manage tasks",
-                buttonText = "View Projects",
-                iconRes = R.drawable.ic_ghost,
-                onActionClick = { /* TODO: Navigate to view projects */ }
-            )
-        } else {
-            ProjectsContent(
-                projects = activeProjects,
-                onNewProject = { showCreateDialog = true },
-                onProjectClick = { project -> selectedProject = project }
-            )
-        }
-
-        // Show create dialog when needed
-        if (showCreateDialog) {
-            CreateProjectDialog(
-                currentUser = currentUser,
-                onDismiss = { showCreateDialog = false },
-                onCreate = { project ->
-                    activeProjects = activeProjects + project
-                    showCreateDialog = false
-                }
-            )
-        }
-
-        // Show project detail dialog when a project is selected
-        if (selectedProject != null) {
-            ProjectDetailDialog(
-                project = selectedProject!!,
-                currentUser = currentUser,
-                onDismiss = { selectedProject = null },
-                onEditProject = { project ->
-                    // TODO: Implement edit project functionality
-                    // For now, you can show a snackbar or navigate to edit screen
-                    selectedProject = null
-                },
-                onInviteMembers = { project ->
-                    // TODO: Implement invite members feature
-                    // Show invite dialog or navigate to invite screen
-                }
-            )
-        }
-    }
-}
-
-@Composable
-fun ProjectsContent(
-    projects: List<Project>,
-    onNewProject: () -> Unit,
-    onProjectClick: (Project) -> Unit
-) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -120,61 +43,141 @@ fun ProjectsContent(
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Top Buttons Row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedButton(
-                onClick = { /* TODO: Sync */ },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(8.dp),
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Text(text = "Sync", color = Color.Black, fontSize = 13.sp)
-            }
-            Button(
-                onClick = onNewProject,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF102A43)),
-                modifier = Modifier.weight(1.2f),
-                shape = RoundedCornerShape(8.dp),
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Text(text = "New Project", color = Color.White, fontSize = 13.sp)
-            }
-            Button(
-                onClick = { /* TODO: Join */ },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF102A43)),
-                modifier = Modifier.weight(1.2f),
-                shape = RoundedCornerShape(8.dp),
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Text(text = "Join Project", color = Color.White, fontSize = 13.sp)
-            }
+        // Button row - always visible
+        ButtonRow(
+            onSync = { /* TODO: Sync */ },
+            onNewProject = { showCreateDialog = true },
+            onJoinProject = { /* TODO: Join */ }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Content - either empty state or projects list
+        if (activeProjects.isEmpty()) {
+            EmptyState(
+                title = "No Active Projects",
+                subtitle = "Start by creating your first project to manage tasks.",
+                buttonText = "Create Project",
+                iconRes = R.drawable.ic_ghost,
+                onActionClick = { showCreateDialog = true }
+            )
+        } else {
+            ProjectsList(
+                projects = activeProjects,
+                onProjectClick = { project -> selectedProject = project }
+            )
         }
+    }
 
-        Spacer(modifier = Modifier.height(24.dp))
+    // Dialogs
+    if (showCreateDialog) {
+        CreateProjectDialog(
+            currentUser = currentUser,
+            onDismiss = { showCreateDialog = false },
+            onCreate = { project ->
+                activeProjects = activeProjects + project
+                showCreateDialog = false
+            }
+        )
+    }
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    top = 8.dp,
-                    bottom = 32.dp
-                )
-            ) {
-                items(projects) { project ->
-                    ProjectCard(
-                        project = project,
-                        onClick = { onProjectClick(project) }
-                    )
+    if (selectedProject != null) {
+        ProjectDetailDialog(
+            project = selectedProject!!,
+            currentUser = currentUser,
+            onDismiss = { selectedProject = null },
+            onEditProject = { project ->
+                selectedProject = null
+            },
+            onInviteMembers = { project ->
+                // TODO: Implement invite members feature
+            },
+            onTaskCreated = { newTask ->
+                activeProjects = activeProjects.map { p ->
+                    if (p.id == selectedProject?.id) {
+                        p.copy(totalTasks = p.totalTasks + 1)
+                    } else p
                 }
             }
+        )
+    }
+}
+
+@Composable
+fun ButtonRow(
+    onSync: () -> Unit,
+    onNewProject: () -> Unit,
+    onJoinProject: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        OutlinedButton(
+            onClick = onSync,
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text(
+                text = "Sync",
+                color = Color.Black,
+                fontSize = 13.sp
+            )
+        }
+
+        Button(
+            onClick = onNewProject,
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF102A43)),
+            modifier = Modifier.weight(1.2f),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text(
+                text = "New Project",
+                color = Color.White,
+                fontSize = 13.sp
+            )
+        }
+
+        Button(
+            onClick = onJoinProject,
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF102A43)),
+            modifier = Modifier.weight(1.2f),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text(
+                text = "Join Project",
+                color = Color.White,
+                fontSize = 13.sp
+            )
         }
     }
 }
 
+@Composable
+fun ProjectsList(
+    projects: List<Project>,
+    onProjectClick: (Project) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            top = 8.dp,
+            bottom = 32.dp
+        )
+    ) {
+        items(projects) { project ->
+            ProjectCard(
+                project = project,
+                onClick = { onProjectClick(project) }
+            )
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true, showSystemUi = false)
 @Composable
 fun ProjectsScreenPreview() {

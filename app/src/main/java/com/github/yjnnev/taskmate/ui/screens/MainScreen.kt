@@ -66,17 +66,6 @@ fun MainScreen() {
                     )
                 }
             }
-            composable(Screen.Reviews.route) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    EmptyState(
-                        title = "No Reviews",
-                        subtitle = "Keep track of your project progress and reviews here.",
-                        buttonText = "Check Updates",
-                        iconRes = R.drawable.ic_ghost,
-                        onActionClick = { /* TODO */ }
-                    )
-                }
-            }
             composable(Screen.Projects.route) {
                 ProjectsScreenContainer()
             }
