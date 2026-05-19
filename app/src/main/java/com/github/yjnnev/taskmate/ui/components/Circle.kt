@@ -1,4 +1,4 @@
-package com.github.yjnnev.noteapp.ui.components
+package com.github.yjnnev.taskmate.ui.components
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.background
@@ -8,7 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.github.yjnnev.noteapp.ui.theme.White
+import com.github.yjnnev.taskmate.ui.theme.White
 
 @Composable
 fun Circle(

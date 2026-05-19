@@ -1,4 +1,4 @@
-package com.github.yjnnev.noteapp.ui.theme
+package com.github.yjnnev.taskmate.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

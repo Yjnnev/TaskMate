@@ -1,4 +1,4 @@
-package com.github.yjnnev.noteapp
+package com.github.yjnnev.taskmate
 
 import org.junit.Test
 

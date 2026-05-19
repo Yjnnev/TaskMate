@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "NoteApp"
+rootProject.name = "TaskMate"
 include(":app")

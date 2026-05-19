@@ -1,4 +1,4 @@
-package com.github.yjnnev.noteapp.ui.screens
+package com.github.yjnnev.taskmate.ui.screens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,14 +8,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.github.yjnnev.noteapp.ui.components.SteelPlate
-import com.github.yjnnev.noteapp.ui.theme.Blue
-import com.github.yjnnev.noteapp.ui.theme.Green
-import com.github.yjnnev.noteapp.ui.theme.Indigo
-import com.github.yjnnev.noteapp.ui.theme.NoteAppTheme
-import com.github.yjnnev.noteapp.ui.theme.Orange
-import com.github.yjnnev.noteapp.ui.theme.Violet
-import com.github.yjnnev.noteapp.ui.theme.Yellow
+import com.github.yjnnev.taskmate.ui.components.SteelPlate
+import com.github.yjnnev.taskmate.ui.theme.Blue
+import com.github.yjnnev.taskmate.ui.theme.Green
+import com.github.yjnnev.taskmate.ui.theme.Indigo
+import com.github.yjnnev.taskmate.ui.theme.NoteAppTheme
+import com.github.yjnnev.taskmate.ui.theme.Orange
+import com.github.yjnnev.taskmate.ui.theme.Violet
+import com.github.yjnnev.taskmate.ui.theme.Yellow
 
 @Composable
 fun SampleHomeScreen() {

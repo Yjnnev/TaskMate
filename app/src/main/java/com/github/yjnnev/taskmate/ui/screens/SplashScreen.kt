@@ -1,4 +1,4 @@
-package com.github.yjnnev.noteapp.ui.screens
+package com.github.yjnnev.taskmate.ui.screens
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -29,9 +29,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import com.github.yjnnev.noteapp.R
-import com.github.yjnnev.noteapp.ui.theme.NavyDark
-import com.github.yjnnev.noteapp.ui.theme.TaskMatePurple
+import com.github.yjnnev.taskmate.R
+import com.github.yjnnev.taskmate.ui.theme.NavyDark
+import com.github.yjnnev.taskmate.ui.theme.TaskMatePurple
 
 @Composable
 fun SplashScreen(onNavigateToLogin: () -> Unit) {

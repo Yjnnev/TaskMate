@@ -1,4 +1,4 @@
-package com.github.yjnnev.noteapp.ui.components
+package com.github.yjnnev.taskmate.ui.components
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.background
@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.ui.unit.dp
-import com.github.yjnnev.noteapp.ui.theme.*
+import com.github.yjnnev.taskmate.ui.theme.*
 
 
 @Composable

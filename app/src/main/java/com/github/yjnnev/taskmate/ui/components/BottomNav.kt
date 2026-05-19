@@ -1,6 +1,5 @@
-package com.github.yjnnev.noteapp.ui.components
+package com.github.yjnnev.taskmate.ui.components
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -13,7 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.github.yjnnev.noteapp.R // Replace with your actual package name
+import com.github.yjnnev.taskmate.R // Replace with your actual package name
 
 sealed class Screen(val route: String, val title: String, val iconRes: Int) {
     object Tasks : Screen("tasks", "Tasks", R.drawable.ic_ghost)

@@ -1,4 +1,4 @@
-package com.github.yjnnev.noteapp
+package com.github.yjnnev.taskmate
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,9 +10,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.view.WindowCompat
-import com.github.yjnnev.noteapp.ui.screens.HomeScreen
-import com.github.yjnnev.noteapp.ui.screens.SplashScreen
-import com.github.yjnnev.noteapp.ui.theme.NoteAppTheme
+import com.github.yjnnev.taskmate.ui.screens.HomeScreen
+import com.github.yjnnev.taskmate.ui.screens.SplashScreen
+import com.github.yjnnev.taskmate.ui.theme.NoteAppTheme
 import android.graphics.Color as AndroidColor // 2. Add this alias for clarity
 
 class MainActivity : ComponentActivity() {

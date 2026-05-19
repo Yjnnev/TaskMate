@@ -1,6 +1,5 @@
-package com.github.yjnnev.noteapp.ui.theme
+package com.github.yjnnev.taskmate.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
