@@ -2,34 +2,44 @@ package com.github.yjnnev.taskmate.ui.dialogs
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.github.yjnnev.taskmate.classes.*
-import com.github.yjnnev.taskmate.ui.components.CategoryBadge
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import com.github.yjnnev.taskmate.classes.Project
+import com.github.yjnnev.taskmate.classes.Task
+import com.github.yjnnev.taskmate.classes.TaskStatus
+import com.github.yjnnev.taskmate.classes.User
+import com.github.yjnnev.taskmate.ui.components.DescriptionSection
 import com.github.yjnnev.taskmate.ui.components.ProgressSection
+import com.github.yjnnev.taskmate.ui.components.ProjectDetailHeader
+import com.github.yjnnev.taskmate.ui.components.QuickActionsSection
+import com.github.yjnnev.taskmate.ui.components.TaskItem
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -189,369 +199,5 @@ fun ProjectDetailDialog(
                 }
             )
         }
-    }
-}
-
-@Composable
-private fun ProjectDetailHeader(
-    project: Project,
-    isOwner: Boolean,
-    onDismiss: () -> Unit,
-    onEditProject: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                project.category.color.copy(alpha = 0.05f)
-            )
-            .padding(20.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
-            ) {
-                // Category Icon
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .background(
-                            project.category.color.copy(alpha = 0.15f),
-                            RoundedCornerShape(14.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = project.category.icon,
-                        contentDescription = "Category",
-                        modifier = Modifier.size(28.dp),
-                        tint = project.category.color
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = project.title,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1A1A1A),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    CategoryBadge(category = project.category)
-                }
-            }
-
-            // Action Buttons
-            Row {
-                if (isOwner) {
-                    IconButton(
-                        onClick = onEditProject,
-                        modifier = Modifier.size(40.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit Project",
-                            tint = Color(0xFF102A43),
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-                IconButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
-                        tint = Color.Gray,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Owner Info
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .background(project.category.color),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = project.owner.username.take(1).uppercase(),
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Owned by ${project.owner.username}",
-                fontSize = 13.sp,
-                color = Color(0xFF6B7280)
-            )
-        }
-    }
-}
-
-
-
-@Composable
-private fun QuickActionsSection(
-    onInviteMembers: () -> Unit,
-    onViewMembers: () -> Unit,
-    onAddTask: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // Members button
-        OutlinedButton(
-            onClick = onViewMembers,
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = Color(0xFF102A43)
-            ),
-            contentPadding = PaddingValues(horizontal = 4.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Group,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = "Members",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-
-        // Invite button
-        OutlinedButton(
-            onClick = onInviteMembers,
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = Color(0xFF102A43)
-            ),
-            contentPadding = PaddingValues(horizontal = 4.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.PersonAdd,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = "Invite",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-
-        // Add Task button
-        Button(
-            onClick = onAddTask,
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF102A43)
-            ),
-            contentPadding = PaddingValues(horizontal = 4.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = "Task",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-    }
-}
-
-@Composable
-private fun DescriptionSection(description: String) {
-    Column {
-        Text(
-            text = "Description",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = Color(0xFF1A1A1A)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = description,
-            fontSize = 14.sp,
-            color = Color(0xFF6B7280),
-            lineHeight = 20.sp
-        )
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-private fun TaskItem(
-    task: Task,
-    isOwner: Boolean,
-    onStatusChange: (TaskStatus) -> Unit,
-    onAssignTask: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF8FAFC)
-        ),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Checkbox for ticking tasks
-            Checkbox(
-                checked = task.status == TaskStatus.COMPLETED,
-                onCheckedChange = { checked ->
-                    onStatusChange(if (checked) TaskStatus.COMPLETED else TaskStatus.TODO)
-                },
-                colors = CheckboxDefaults.colors(
-                    checkedColor = Color(0xFF4CAF50),
-                    uncheckedColor = Color(0xFF9CA3AF)
-                ),
-                modifier = Modifier.size(24.dp)
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = task.title,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (task.status == TaskStatus.COMPLETED) Color.Gray else Color(0xFF1A1A1A),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textDecoration = if (task.status == TaskStatus.COMPLETED) TextDecoration.LineThrough else null
-                )
-
-                if (task.description.isNotBlank()) {
-                    Text(
-                        text = task.description,
-                        fontSize = 12.sp,
-                        color = Color(0xFF6B7280),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    // Due Date
-                    if (task.dueDate != null) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.DateRange,
-                                contentDescription = null,
-                                modifier = Modifier.size(12.dp),
-                                tint = Color(0xFF9CA3AF)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = task.dueDate.format(DateTimeFormatter.ofPattern("MMM dd")),
-                                fontSize = 11.sp,
-                                color = Color(0xFF6B7280)
-                            )
-                        }
-                    }
-
-                    // Priority Badge
-                    PriorityBadge(priority = task.priority)
-                }
-            }
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (isOwner) {
-                    IconButton(
-                        onClick = onAssignTask,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AssignmentInd,
-                            contentDescription = "Assign Task",
-                            tint = Color(0xFF102A43),
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(4.dp))
-                }
-                // Status Badge
-                StatusBadge(status = task.status)
-            }
-        }
-    }
-}
-
-@Composable
-private fun PriorityBadge(priority: PriorityLevel) {
-    Surface(
-        shape = RoundedCornerShape(4.dp),
-        color = Color(priority.color).copy(alpha = 0.1f)
-    ) {
-        Text(
-            text = priority.displayName,
-            fontSize = 10.sp,
-            color = Color(priority.color),
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-        )
-    }
-}
-
-@Composable
-private fun StatusBadge(status: TaskStatus) {
-    val (text, color) = when (status) {
-        TaskStatus.TODO -> "To Do" to Color(0xFF6B7280)
-        TaskStatus.IN_PROGRESS -> "In Progress" to Color(0xFFF59E0B)
-        TaskStatus.COMPLETED -> "Done" to Color(0xFF4CAF50)
-    }
-
-    Surface(
-        shape = RoundedCornerShape(6.dp),
-        color = color.copy(alpha = 0.1f)
-    ) {
-        Text(
-            text = text,
-            fontSize = 11.sp,
-            color = color,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-        )
     }
 }

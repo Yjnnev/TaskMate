@@ -12,6 +12,7 @@ sealed class Screen(
 ) {
     object Tasks : Screen("tasks", "Tasks", iconRes = R.drawable.ic_ghost)
     object Projects : Screen("projects", "Projects", iconRes = R.drawable.ic_ghost)
+    object Login : Screen("login", "Login")
 
     // Easy to add new screens:
     // object Settings : Screen("settings", "Settings", iconRes = R.drawable.ic_settings)

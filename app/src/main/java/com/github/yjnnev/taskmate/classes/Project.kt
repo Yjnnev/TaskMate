@@ -4,6 +4,7 @@ data class Project(
     val id: String = java.util.UUID.randomUUID().toString(),
     val title: String = "",
     val description: String = "",
+    val code: String = "",
     val category: ProjectCategory = ProjectCategory.WORK,
     val owner: User = User(),
     val memberCount: Int = 1,

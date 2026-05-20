@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.yjnnev.taskmate.R
 import com.github.yjnnev.taskmate.ui.components.EmptyState
+import com.github.yjnnev.taskmate.ui.components.TaskItem
 import com.github.yjnnev.taskmate.ui.viewmodel.TaskMateViewModel
 import com.github.yjnnev.taskmate.ui.dialogs.CreateTaskDialog
 import com.github.yjnnev.taskmate.classes.Task
@@ -105,127 +106,5 @@ fun TasksScreen(
                 }
             )
         }
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-private fun TaskItem(
-    task: Task,
-    onStatusChange: (TaskStatus) -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF8FAFC)
-        ),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = task.status == TaskStatus.COMPLETED,
-                onCheckedChange = { checked ->
-                    onStatusChange(if (checked) TaskStatus.COMPLETED else TaskStatus.TODO)
-                },
-                colors = CheckboxDefaults.colors(
-                    checkedColor = Color(0xFF4CAF50),
-                    uncheckedColor = Color(0xFF9CA3AF)
-                ),
-                modifier = Modifier.size(24.dp)
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = task.title,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (task.status == TaskStatus.COMPLETED) Color.Gray else Color(0xFF1A1A1A),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textDecoration = if (task.status == TaskStatus.COMPLETED) TextDecoration.LineThrough else null
-                )
-
-                if (task.description.isNotBlank()) {
-                    Text(
-                        text = task.description,
-                        fontSize = 12.sp,
-                        color = Color(0xFF6B7280),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    if (task.dueDate != null) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.DateRange,
-                                contentDescription = null,
-                                modifier = Modifier.size(12.dp),
-                                tint = Color(0xFF9CA3AF)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = task.dueDate.format(DateTimeFormatter.ofPattern("MMM dd")),
-                                fontSize = 11.sp,
-                                color = Color(0xFF6B7280)
-                            )
-                        }
-                    }
-                    PriorityBadge(priority = task.priority)
-                }
-            }
-
-            StatusBadge(status = task.status)
-        }
-    }
-}
-
-@Composable
-private fun PriorityBadge(priority: PriorityLevel) {
-    Surface(
-        shape = RoundedCornerShape(4.dp),
-        color = Color(priority.color).copy(alpha = 0.1f)
-    ) {
-        Text(
-            text = priority.displayName,
-            fontSize = 10.sp,
-            color = Color(priority.color),
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-        )
-    }
-}
-
-@Composable
-private fun StatusBadge(status: TaskStatus) {
-    val (text, color) = when (status) {
-        TaskStatus.TODO -> "To Do" to Color(0xFF6B7280)
-        TaskStatus.IN_PROGRESS -> "In Progress" to Color(0xFFF59E0B)
-        TaskStatus.COMPLETED -> "Done" to Color(0xFF4CAF50)
-    }
-
-    Surface(
-        shape = RoundedCornerShape(6.dp),
-        color = color.copy(alpha = 0.1f)
-    ) {
-        Text(
-            text = text,
-            fontSize = 11.sp,
-            color = color,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-        )
     }
 }

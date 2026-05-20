@@ -126,6 +126,26 @@ fun ProjectCard(
                                         maxLines = 1
                                     )
                                 }
+
+                                // Project Code chip
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .background(
+                                            project.category.color.copy(alpha = 0.1f),
+                                            RoundedCornerShape(6.dp)
+                                        )
+                                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = project.code,
+                                        fontSize = 10.sp,
+                                        color = project.category.color,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1,
+                                        letterSpacing = 0.5.sp
+                                    )
+                                }
                             }
                         }
                     }

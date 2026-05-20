@@ -11,6 +11,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowCompat
+import androidx.compose.runtime.collectAsState
+import com.github.yjnnev.taskmate.data.UserManager
+import com.github.yjnnev.taskmate.ui.screens.LoginScreen
 import com.github.yjnnev.taskmate.ui.screens.MainScreen
 import com.github.yjnnev.taskmate.ui.screens.SplashScreen
 import com.github.yjnnev.taskmate.ui.theme.NavyDark
@@ -31,9 +34,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             TaskMateTheme {
                 var showSplash by remember { mutableStateOf(true) }
+                val currentUserId by UserManager.currentUserId.collectAsState()
 
                 if (showSplash) {
                     SplashScreen(onNavigateToLogin = { showSplash = false })
+                } else if (currentUserId == null) {
+                    LoginScreen()
                 } else {
                     MainScreen()
                 }

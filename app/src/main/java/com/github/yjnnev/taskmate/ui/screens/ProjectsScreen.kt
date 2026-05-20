@@ -20,6 +20,8 @@ import com.github.yjnnev.taskmate.classes.User
 import com.github.yjnnev.taskmate.ui.dialogs.CreateProjectDialog
 import com.github.yjnnev.taskmate.ui.components.EmptyState
 import com.github.yjnnev.taskmate.ui.components.ProjectCard
+import com.github.yjnnev.taskmate.ui.components.ButtonRow
+import com.github.yjnnev.taskmate.ui.components.ProjectsList
 import com.github.yjnnev.taskmate.ui.dialogs.ProjectDetailDialog
 import com.github.yjnnev.taskmate.ui.viewmodel.TaskMateViewModel
 import com.github.yjnnev.taskmate.R
@@ -113,102 +115,6 @@ fun ProjectsScreenContainer(
                 onTaskStatusChange = { task, newStatus ->
                     viewModel.updateTaskStatus(task, newStatus)
                 }
-            )
-        }
-    }
-}
-
-@Composable
-fun ButtonRow(
-    onSync: () -> Unit,
-    onNewProject: () -> Unit,
-    onJoinProject: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Button(
-            onClick = onSync,
-            modifier = Modifier
-                .weight(1f)
-                .height(48.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent,
-                contentColor = Color.Black
-            ),
-            shape = RoundedCornerShape(8.dp),
-            border = ButtonDefaults.outlinedButtonBorder,
-            contentPadding = PaddingValues(0.dp)  // Remove default padding
-        ) {
-            Text(
-                text = "Sync",
-                fontSize = 13.sp,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-            )
-        }
-
-        Button(
-            onClick = onNewProject,
-            modifier = Modifier
-                .weight(1f)
-                .height(48.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF102A43),
-                disabledContainerColor = Color(0xFFE5E7EB)
-            ),
-            shape = RoundedCornerShape(8.dp),
-            contentPadding = PaddingValues(0.dp)  // Remove default padding
-        ) {
-            Text(
-                text = "New Project",
-                color = Color.White,
-                fontSize = 13.sp,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-            )
-        }
-
-        Button(
-            onClick = onJoinProject,
-            modifier = Modifier
-                .weight(1f)
-                .height(48.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF102A43)),
-            shape = RoundedCornerShape(8.dp),
-            contentPadding = PaddingValues(0.dp)  // Remove default padding
-        ) {
-            Text(
-                text = "Join Project",
-                color = Color.White,
-                fontSize = 13.sp,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-            )
-        }
-    }
-}
-
-@Composable
-fun ProjectsList(
-    projects: List<Project>,
-    onProjectClick: (Project) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            top = 8.dp,
-            bottom = 32.dp
-        )
-    ) {
-        items(projects) { project ->
-            ProjectCard(
-                project = project,
-                onClick = { onProjectClick(project) }
             )
         }
     }

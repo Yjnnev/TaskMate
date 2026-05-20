@@ -18,10 +18,20 @@ object UserManager {
     val currentUserId: StateFlow<String?> = _currentUserId.asStateFlow()
 
     init {
-        // Automatically sign in a default user for now if none exists
         scope.launch {
-            if (_currentUserId.value == null) {
-                signInWithEmail("guest@taskmate.com", "password")
+            // Seed dummy user for testing
+            val dummyEmail = "test@example.com"
+            if (repository.getUserByEmail(dummyEmail) == null) {
+                repository.createOrUpdateUser(UserEntity(
+                    id = "dummy_id",
+                    name = "Test User",
+                    email = dummyEmail,
+                    username = "testuser",
+                    profilePictureUrl = null,
+                    authProvider = AuthProvider.EMAIL,
+                    createdAt = System.currentTimeMillis(),
+                    lastLoginAt = System.currentTimeMillis()
+                ))
             }
         }
     }
@@ -52,7 +62,12 @@ object UserManager {
         _currentUserId.value = userId
     }
 
-    suspend fun signInWithEmail(email: String, password: String) {
+    suspend fun signInWithEmail(email: String, password: String): Boolean {
+        // For testing purposes, we accept 'test123' for the dummy user
+        if (email == "test@example.com" && password != "test123") {
+            return false
+        }
+
         // TODO: Implement actual authentication
         val user = repository.getUserByEmail(email) ?: UserEntity(
             id = "user_${System.currentTimeMillis()}",
@@ -66,6 +81,7 @@ object UserManager {
         )
         repository.createOrUpdateUser(user)
         _currentUserId.value = user.id
+        return true
     }
 
     suspend fun signInWithGoogle(googleUser: UserEntity) {

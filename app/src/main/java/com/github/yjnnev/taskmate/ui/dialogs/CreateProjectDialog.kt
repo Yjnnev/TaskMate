@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -60,6 +61,7 @@ fun CreateProjectDialog(
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(ProjectCategory.WORK) }
+    val generatedCode = remember { (1..7).map { (('A'..'Z') + ('0'..'9')).random() }.joinToString("") }
 
     val isValid = title.isNotBlank() && description.isNotBlank() && currentUser != null
 
@@ -168,6 +170,40 @@ fun CreateProjectDialog(
                     )
                 )
 
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Project Code Preview
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF3F4F6), RoundedCornerShape(12.dp))
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Project Join Code",
+                            fontSize = 12.sp,
+                            color = Color(0xFF6B7280),
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = generatedCode,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF102A43),
+                            letterSpacing = 2.sp
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.Default.VpnKey,
+                        contentDescription = null,
+                        tint = Color(0xFF102A43).copy(alpha = 0.6f),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Create Button
@@ -177,6 +213,7 @@ fun CreateProjectDialog(
                             val project = Project(
                                 title = title,
                                 description = description,
+                                code = generatedCode,
                                 category = selectedCategory,
                                 owner = user
                             )
@@ -257,48 +294,6 @@ fun CategoryChip(
             fontSize = 11.sp,
             color = if (isSelected) category.color else Color(0xFF9CA3AF),
             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
-        )
-    }
-}
-
-// Preview for CreateProjectDialog
-@Preview(showBackground = true, showSystemUi = false)
-@Composable
-fun CreateProjectDialogPreview() {
-    val demoUser = User(
-        name = "John Doe",
-        email = "john.doe@example.com"
-        // username will default to "John Doe" since it's not specified
-    )
-
-    TaskMateTheme {
-        CreateProjectDialog(
-            currentUser = demoUser,
-            onDismiss = { /* Preview - no action needed */ },
-            onCreate = { project ->
-                /* Preview - no action needed */
-            }
-        )
-    }
-}
-
-// Alternative preview with different user
-@Preview(showBackground = true, showSystemUi = false)
-@Composable
-fun CreateProjectDialogPreviewCustomUsername() {
-    val customUser = User(
-        name = "Jane Smith",
-        email = "jane.smith@example.com",
-        username = "janesmith" // Custom username different from name
-    )
-
-    TaskMateTheme {
-        CreateProjectDialog(
-            currentUser = customUser,
-            onDismiss = { /* Preview - no action needed */ },
-            onCreate = { project ->
-                /* Preview - no action needed */
-            }
         )
     }
 }
