@@ -13,5 +13,6 @@ data class Task(
     val assignedToUserId: String? = null, // Can be null for unassigned tasks
     val createdByUserId: String = "",
     val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
+    val isHidden: Boolean = false
 )

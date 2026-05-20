@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.yjnnev.taskmate.classes.Project
+import com.github.yjnnev.taskmate.classes.Task
 import com.github.yjnnev.taskmate.classes.User
 import com.github.yjnnev.taskmate.ui.dialogs.CreateProjectDialog
 import com.github.yjnnev.taskmate.ui.components.EmptyState
@@ -24,6 +25,7 @@ import com.github.yjnnev.taskmate.ui.components.ButtonRow
 import com.github.yjnnev.taskmate.ui.components.ProjectsList
 import com.github.yjnnev.taskmate.ui.dialogs.ProjectDetailDialog
 import com.github.yjnnev.taskmate.ui.dialogs.JoinProjectDialog
+import com.github.yjnnev.taskmate.ui.dialogs.AssignTaskDialog
 import com.github.yjnnev.taskmate.ui.viewmodel.TaskMateViewModel
 import com.github.yjnnev.taskmate.data.repository.TaskMateRepository
 import com.github.yjnnev.taskmate.R
@@ -36,6 +38,7 @@ fun ProjectsScreenContainer(
     var showCreateDialog by remember { mutableStateOf(false) }
     var showJoinDialog by remember { mutableStateOf(false) }
     var selectedProject by remember { mutableStateOf<Project?>(null) }
+    var taskToAssign by remember { mutableStateOf<Task?>(null) }
 
     val currentUser by viewModel.currentUser.collectAsState()
     val activeProjects by viewModel.projects.collectAsState()
@@ -134,20 +137,23 @@ fun ProjectsScreenContainer(
                     viewModel.deleteProject(projectToDelete)
                     selectedProject = null
                 },
-                onInviteMembers = { project ->
-                    // TODO: Implement invite members feature
-                },
                 onViewMembers = { project ->
                     // TODO: Implement view members feature
                 },
                 onAssignTask = { task ->
-                    // TODO: Implement assign task feature
+                    taskToAssign = task
                 },
                 onTaskCreated = { newTask ->
                     viewModel.createTask(newTask)
                 },
+                onTaskDeleted = { task ->
+                    viewModel.deleteTask(task)
+                },
                 onTaskStatusChange = { task, newStatus ->
                     viewModel.updateTaskStatus(task, newStatus)
+                },
+                onToggleTaskVisibility = { task ->
+                    viewModel.toggleTaskVisibility(task)
                 },
                 onLeaveProject = { projectToLeave ->
                     viewModel.leaveProject(projectToLeave.id) { success ->
@@ -158,5 +164,20 @@ fun ProjectsScreenContainer(
                 }
             )
         }
+    }
+
+    if (taskToAssign != null && selectedProject != null) {
+        val projectMembers by viewModel.getProjectMembers(selectedProject!!.id).collectAsState(initial = emptyList())
+        AssignTaskDialog(
+            members = projectMembers,
+            currentAssigneeId = taskToAssign?.assignedToUserId,
+            onDismiss = { taskToAssign = null },
+            onAssign = { userId ->
+                taskToAssign?.let { task ->
+                    viewModel.assignTask(task.id, userId)
+                }
+                taskToAssign = null
+            }
+        )
     }
 }

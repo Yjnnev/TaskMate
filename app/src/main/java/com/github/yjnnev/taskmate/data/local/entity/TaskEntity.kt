@@ -19,5 +19,6 @@ data class TaskEntity(
     val assignedToUserId: String?,
     val createdByUserId: String,
     val createdAt: Long,
-    val updatedAt: Long
+    val updatedAt: Long,
+    val isHidden: Boolean = false
 )

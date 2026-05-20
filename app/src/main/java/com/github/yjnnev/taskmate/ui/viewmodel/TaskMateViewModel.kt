@@ -160,6 +160,24 @@ class TaskMateViewModel(
         }
     }
 
+    fun toggleTaskVisibility(task: Task) {
+        viewModelScope.launch {
+            repository.updateTask(task.copy(isHidden = !task.isHidden, updatedAt = System.currentTimeMillis()).toEntity())
+        }
+    }
+
+    fun assignTask(taskId: String, userId: String?) {
+        viewModelScope.launch {
+            repository.assignTask(taskId, userId)
+        }
+    }
+
+    fun deleteTask(task: Task) {
+        viewModelScope.launch {
+            repository.deleteTask(task.toEntity())
+        }
+    }
+
     // Mappers
     private fun UserEntity.toUser(): User {
         return User(
@@ -225,7 +243,8 @@ class TaskMateViewModel(
             assignedToUserId = assignedToUserId,
             createdByUserId = createdByUserId,
             createdAt = createdAt,
-            updatedAt = updatedAt
+            updatedAt = updatedAt,
+            isHidden = isHidden
         )
     }
 
@@ -241,7 +260,8 @@ class TaskMateViewModel(
             assignedToUserId = assignedToUserId,
             createdByUserId = createdByUserId,
             createdAt = createdAt,
-            updatedAt = updatedAt
+            updatedAt = updatedAt,
+            isHidden = isHidden
         )
     }
 }

@@ -13,7 +13,7 @@ import com.github.yjnnev.taskmate.data.local.entity.*
         TaskEntity::class,
         ProjectMemberEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

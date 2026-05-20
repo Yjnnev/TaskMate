@@ -1,12 +1,13 @@
 package com.github.yjnnev.taskmate.data
 
-import com.github.yjnnev.taskmate.classes.Project
-import com.github.yjnnev.taskmate.classes.ProjectCategory
-import com.github.yjnnev.taskmate.classes.User
-import com.github.yjnnev.taskmate.classes.AuthProvider
+import android.os.Build
+import androidx.annotation.RequiresApi
+import com.github.yjnnev.taskmate.classes.*
 import com.github.yjnnev.taskmate.data.local.entity.ProjectEntity
+import com.github.yjnnev.taskmate.data.local.entity.TaskEntity
 import com.github.yjnnev.taskmate.data.local.entity.UserEntity
 import com.github.yjnnev.taskmate.data.repository.TaskMateRepository
+import java.time.LocalDate
 
 object SampleData {
     val users = listOf(
@@ -71,6 +72,7 @@ object SampleData {
         )
     )
 
+    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun seedDatabase(repository: TaskMateRepository) {
         // Create users
         users.forEach { user ->
@@ -101,6 +103,72 @@ object SampleData {
                     ownerId = project.owner.id,
                     createdAt = project.createdAt,
                     updatedAt = project.updatedAt
+                )
+            )
+        }
+
+        // Create sample tasks
+        val sampleTasks = listOf(
+            Task(
+                id = "task_1",
+                projectId = "proj_1",
+                title = "Design UI Mockups",
+                description = "Create high-fidelity mockups for the main screens.",
+                status = TaskStatus.COMPLETED,
+                priority = PriorityLevel.HIGH,
+                assignedToUserId = "user_1",
+                createdByUserId = "user_1",
+                dueDate = LocalDate.now().plusDays(2)
+            ),
+            Task(
+                id = "task_2",
+                projectId = "proj_1",
+                title = "Implement Room Database",
+                description = "Set up entities, DAOs, and the database class.",
+                status = TaskStatus.TODO,
+                priority = PriorityLevel.HIGH,
+                assignedToUserId = "user_1",
+                createdByUserId = "user_1",
+                dueDate = LocalDate.now().plusDays(5)
+            ),
+            Task(
+                id = "task_3",
+                projectId = "proj_1",
+                title = "User Authentication",
+                description = "Implement login and sign up with Firebase or similar.",
+                status = TaskStatus.TODO,
+                priority = PriorityLevel.MEDIUM,
+                assignedToUserId = "user_2",
+                createdByUserId = "user_1",
+                dueDate = LocalDate.now().plusDays(7)
+            ),
+            Task(
+                id = "task_4",
+                projectId = "proj_2",
+                title = "Buy Groceries",
+                description = "Milk, eggs, bread, and fruits.",
+                status = TaskStatus.TODO,
+                priority = PriorityLevel.LOW,
+                assignedToUserId = "user_2",
+                createdByUserId = "user_2",
+                dueDate = LocalDate.now()
+            )
+        )
+
+        sampleTasks.forEach { task ->
+            repository.createTask(
+                TaskEntity(
+                    id = task.id,
+                    projectId = task.projectId,
+                    title = task.title,
+                    description = task.description,
+                    status = task.status,
+                    dueDate = task.dueDate,
+                    priority = task.priority,
+                    assignedToUserId = task.assignedToUserId,
+                    createdByUserId = task.createdByUserId,
+                    createdAt = task.createdAt,
+                    updatedAt = task.updatedAt
                 )
             )
         }

@@ -115,6 +115,10 @@ class TaskMateRepository(
         taskDao.updateTask(task)
     }
 
+    suspend fun deleteTask(task: TaskEntity) {
+        taskDao.deleteTask(task)
+    }
+
     fun observeProjectTasks(projectId: String): Flow<List<TaskEntity>> {
         return taskDao.observeTasksByProject(projectId)
     }

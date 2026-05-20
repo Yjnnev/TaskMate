@@ -14,6 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,7 +46,7 @@ import com.github.yjnnev.taskmate.ui.components.DescriptionSection
 import com.github.yjnnev.taskmate.ui.components.ProgressSection
 import com.github.yjnnev.taskmate.ui.components.ProjectDetailHeader
 import com.github.yjnnev.taskmate.ui.components.QuickActionsSection
-import com.github.yjnnev.taskmate.ui.components.TaskItem
+import com.github.yjnnev.taskmate.ui.components.TaskCard
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -52,17 +56,19 @@ fun ProjectDetailDialog(
     tasks: List<Task>,
     onDismiss: () -> Unit,
     onEditProject: (Project) -> Unit,
-    onInviteMembers: (Project) -> Unit,
     onViewMembers: (Project) -> Unit = {},
     onDeleteProject: (Project) -> Unit = {},
     onAssignTask: (Task) -> Unit = {},
     onTaskCreated: (Task) -> Unit = {},
     onTaskDeleted: (Task) -> Unit = {},
     onTaskStatusChange: (Task, TaskStatus) -> Unit = { _, _ -> },
+    onToggleTaskVisibility: (Task) -> Unit = {},
     onLeaveProject: (Project) -> Unit = {},
     members: List<Pair<User, String>> = emptyList()
 ) {
     var showAllTasks by remember { mutableStateOf(false) }
+    var showHiddenTasks by remember { mutableStateOf(false) }
+    var sortDescending by remember { mutableStateOf(true) }
     var showCreateTaskDialog by remember { mutableStateOf(false) }
     var showEditProjectDialog by remember { mutableStateOf(false) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
@@ -130,8 +136,10 @@ fun ProjectDetailDialog(
                     item {
                         QuickActionsSection(
                             isOwner = isOwner,
-                            onInviteMembers = { onInviteMembers(project) },
-                            onViewMembers = { showMembersDialog = true },
+                            onViewMembers = { 
+                                showMembersDialog = true
+                                onViewMembers(project)
+                            },
                             onAddTask = { showCreateTaskDialog = true }
                         )
                     }
@@ -156,18 +164,42 @@ fun ProjectDetailDialog(
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF1A1A1A)
                             )
-                            TextButton(onClick = { showAllTasks = !showAllTasks }) {
-                                Text(
-                                    text = if (showAllTasks) "Show Less" else "View All",
-                                    color = Color(0xFF102A43),
-                                    fontWeight = FontWeight.SemiBold
-                                )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                IconButton(onClick = { showHiddenTasks = !showHiddenTasks }) {
+                                    Icon(
+                                        imageVector = if (showHiddenTasks) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                        contentDescription = "Toggle Hidden Tasks",
+                                        tint = Color(0xFF102A43),
+                                        modifier = Modifier.padding(4.dp)
+                                    )
+                                }
+                                IconButton(onClick = { sortDescending = !sortDescending }) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.Sort,
+                                        contentDescription = "Sort by Priority",
+                                        tint = if (sortDescending) Color(0xFF102A43) else Color.Gray,
+                                        modifier = Modifier.padding(4.dp)
+                                    )
+                                }
+                                TextButton(onClick = { showAllTasks = !showAllTasks }) {
+                                    Text(
+                                        text = if (showAllTasks) "Show Less" else "View All",
+                                        color = Color(0xFF102A43),
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
                             }
                         }
                     }
 
                     // Task List
-                    val displayTasks = if (showAllTasks) localTasks else localTasks.take(3)
+                    val filteredTasks = if (showHiddenTasks) localTasks else localTasks.filter { !it.isHidden }
+                    val sortedTasks = if (sortDescending) {
+                        filteredTasks.sortedByDescending { it.priority.ordinal }
+                    } else {
+                        filteredTasks.sortedBy { it.priority.ordinal }
+                    }
+                    val displayTasks = if (showAllTasks) sortedTasks else sortedTasks.take(3)
                     if (displayTasks.isEmpty()) {
                         item {
                             Text(
@@ -179,7 +211,7 @@ fun ProjectDetailDialog(
                         }
                     } else {
                         items(displayTasks) { task ->
-                            TaskItem(
+                            TaskCard(
                                 task = task,
                                 isOwner = isOwner,
                                 onStatusChange = { newStatus ->
@@ -189,6 +221,9 @@ fun ProjectDetailDialog(
                                 onDeleteTask = {
                                     localTasks = localTasks.filter { it.id != task.id }
                                     onTaskDeleted(task)
+                                },
+                                onLongClick = {
+                                    onToggleTaskVisibility(task)
                                 }
                             )
                         }

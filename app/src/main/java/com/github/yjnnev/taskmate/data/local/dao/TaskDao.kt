@@ -19,10 +19,10 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE id = :taskId")
     suspend fun getTaskById(taskId: String): TaskEntity?
 
-    @Query("SELECT * FROM tasks WHERE projectId = :projectId ORDER BY createdAt DESC")
+    @Query("SELECT * FROM tasks WHERE projectId = :projectId ORDER BY CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END ASC, createdAt DESC")
     fun observeTasksByProject(projectId: String): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks WHERE assignedToUserId = :userId ORDER BY dueDate ASC")
+    @Query("SELECT * FROM tasks WHERE assignedToUserId = :userId ORDER BY CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END ASC, dueDate ASC")
     fun observeTasksAssignedToUser(userId: String): Flow<List<TaskEntity>>
 
     @Query("SELECT COUNT(*) FROM tasks WHERE projectId = :projectId AND status = 'COMPLETED'")

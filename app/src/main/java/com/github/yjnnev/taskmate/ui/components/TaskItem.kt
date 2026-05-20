@@ -2,6 +2,8 @@ package com.github.yjnnev.taskmate.ui.components
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -22,19 +24,27 @@ import com.github.yjnnev.taskmate.classes.Task
 import com.github.yjnnev.taskmate.classes.TaskStatus
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalFoundationApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TaskItem(
     task: Task,
     isOwner: Boolean = false,
+    canChangeStatus: Boolean = true,
     onStatusChange: (TaskStatus) -> Unit,
     onAssignTask: () -> Unit = {},
-    onDeleteTask: () -> Unit = {}
+    onDeleteTask: () -> Unit = {},
+    onLongClick: () -> Unit = {}
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = { },
+                onLongClick = onLongClick
+            ),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF8FAFC)
+            containerColor = if (task.isHidden) Color(0xFFF1F5F9).copy(alpha = 0.6f) else Color(0xFFF8FAFC)
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -49,7 +59,7 @@ fun TaskItem(
                 onCheckedChange = { checked ->
                     onStatusChange(if (checked) TaskStatus.COMPLETED else TaskStatus.TODO)
                 },
-                enabled = isOwner,
+                enabled = canChangeStatus,
                 colors = CheckboxDefaults.colors(
                     checkedColor = Color(0xFF4CAF50),
                     uncheckedColor = Color(0xFF9CA3AF),

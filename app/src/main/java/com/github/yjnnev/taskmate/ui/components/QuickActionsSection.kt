@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun QuickActionsSection(
     isOwner: Boolean,
-    onInviteMembers: () -> Unit,
     onViewMembers: () -> Unit,
     onAddTask: () -> Unit
 ) {
@@ -49,29 +48,6 @@ fun QuickActionsSection(
         }
 
         if (isOwner) {
-            // Invite button
-            OutlinedButton(
-                onClick = onInviteMembers,
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = Color(0xFF102A43)
-                ),
-                contentPadding = PaddingValues(horizontal = 4.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PersonAdd,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "Invite",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
             // Add Task button
             Button(
                 onClick = onAddTask,
