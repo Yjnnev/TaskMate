@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AssignmentInd
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,7 +28,8 @@ fun TaskItem(
     task: Task,
     isOwner: Boolean = false,
     onStatusChange: (TaskStatus) -> Unit,
-    onAssignTask: () -> Unit = {}
+    onAssignTask: () -> Unit = {},
+    onDeleteTask: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -47,9 +49,11 @@ fun TaskItem(
                 onCheckedChange = { checked ->
                     onStatusChange(if (checked) TaskStatus.COMPLETED else TaskStatus.TODO)
                 },
+                enabled = isOwner,
                 colors = CheckboxDefaults.colors(
                     checkedColor = Color(0xFF4CAF50),
-                    uncheckedColor = Color(0xFF9CA3AF)
+                    uncheckedColor = Color(0xFF9CA3AF),
+                    disabledUncheckedColor = Color(0xFFE5E7EB)
                 ),
                 modifier = Modifier.size(24.dp)
             )
@@ -104,6 +108,18 @@ fun TaskItem(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (isOwner) {
+                    IconButton(
+                        onClick = onDeleteTask,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete Task",
+                            tint = Color.Red.copy(alpha = 0.6f),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
                     IconButton(
                         onClick = onAssignTask,
                         modifier = Modifier.size(32.dp)

@@ -9,6 +9,7 @@ import com.github.yjnnev.taskmate.data.UserManager
 import com.github.yjnnev.taskmate.data.SampleData
 import com.github.yjnnev.taskmate.data.local.entity.ProjectEntity
 import com.github.yjnnev.taskmate.data.local.entity.TaskEntity
+import com.github.yjnnev.taskmate.data.local.entity.UserEntity
 import com.github.yjnnev.taskmate.data.repository.TaskMateRepository
 import com.github.yjnnev.taskmate.di.AppModule
 import kotlinx.coroutines.flow.*
@@ -50,9 +51,34 @@ class TaskMateViewModel(
         }
     }
 
+    fun getProjectMembers(projectId: String): Flow<List<Pair<User, String>>> {
+        return repository.observeProjectMembers(projectId).flatMapLatest { members ->
+            if (members.isEmpty()) return@flatMapLatest flowOf(emptyList())
+            
+            repository.observeAllUsers().map { allUsers ->
+                members.mapNotNull { member ->
+                    val userEntity = allUsers.find { it.id == member.userId }
+                    userEntity?.let { it.toUser() to member.role }
+                }
+            }
+        }
+    }
+
     fun createProject(project: Project) {
         viewModelScope.launch {
             repository.createProject(project.toEntity())
+        }
+    }
+
+    fun updateProject(project: Project) {
+        viewModelScope.launch {
+            repository.updateProject(project.toEntity())
+        }
+    }
+
+    fun deleteProject(project: Project) {
+        viewModelScope.launch {
+            repository.deleteProject(project.toEntity())
         }
     }
 
@@ -94,6 +120,30 @@ class TaskMateViewModel(
     }
 
     // Mappers
+    private fun UserEntity.toUser(): User {
+        return User(
+            id = id,
+            name = name,
+            email = email,
+            username = username,
+            profilePictureUrl = profilePictureUrl,
+            authProvider = authProvider
+        )
+    }
+
+    private fun User.toEntity(createdAt: Long = System.currentTimeMillis(), lastLoginAt: Long = System.currentTimeMillis()): UserEntity {
+        return UserEntity(
+            id = id,
+            name = name,
+            email = email,
+            username = username,
+            profilePictureUrl = profilePictureUrl,
+            authProvider = authProvider,
+            createdAt = createdAt,
+            lastLoginAt = lastLoginAt
+        )
+    }
+
     private fun ProjectEntity.toProject(owner: User): Project {
         return Project(
             id = id,

@@ -117,13 +117,20 @@ fun ProjectsScreenContainer(
         val user = currentUser
         if (user != null) {
             val projectTasks by viewModel.getProjectTasks(selectedProject!!.id).collectAsState(initial = emptyList())
+            val projectMembers by viewModel.getProjectMembers(selectedProject!!.id).collectAsState(initial = emptyList())
 
             ProjectDetailDialog(
                 project = selectedProject!!,
                 currentUser = user,
                 tasks = projectTasks,
+                members = projectMembers,
                 onDismiss = { selectedProject = null },
-                onEditProject = { project ->
+                onEditProject = { updatedProject ->
+                    viewModel.updateProject(updatedProject)
+                    selectedProject = null
+                },
+                onDeleteProject = { projectToDelete ->
+                    viewModel.deleteProject(projectToDelete)
                     selectedProject = null
                 },
                 onInviteMembers = { project ->

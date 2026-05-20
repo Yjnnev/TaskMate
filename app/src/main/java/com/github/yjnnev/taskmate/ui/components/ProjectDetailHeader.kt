@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.*
@@ -25,7 +26,8 @@ fun ProjectDetailHeader(
     project: Project,
     isOwner: Boolean,
     onDismiss: () -> Unit,
-    onEditProject: () -> Unit
+    onEditProject: () -> Unit,
+    onDeleteProject: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -81,6 +83,17 @@ fun ProjectDetailHeader(
             // Action Buttons
             Row {
                 if (isOwner) {
+                    IconButton(
+                        onClick = onDeleteProject,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete Project",
+                            tint = Color.Red.copy(alpha = 0.6f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                     IconButton(
                         onClick = onEditProject,
                         modifier = Modifier.size(40.dp)

@@ -14,8 +14,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -51,12 +54,18 @@ fun ProjectDetailDialog(
     onEditProject: (Project) -> Unit,
     onInviteMembers: (Project) -> Unit,
     onViewMembers: (Project) -> Unit = {},
+    onDeleteProject: (Project) -> Unit = {},
     onAssignTask: (Task) -> Unit = {},
     onTaskCreated: (Task) -> Unit = {},
-    onTaskStatusChange: (Task, TaskStatus) -> Unit = { _, _ -> }
+    onTaskDeleted: (Task) -> Unit = {},
+    onTaskStatusChange: (Task, TaskStatus) -> Unit = { _, _ -> },
+    members: List<Pair<User, String>> = emptyList()
 ) {
     var showAllTasks by remember { mutableStateOf(false) }
     var showCreateTaskDialog by remember { mutableStateOf(false) }
+    var showEditProjectDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var showMembersDialog by remember { mutableStateOf(false) }
 
     // Add local state to track tasks if needed
     var localTasks by remember(tasks) { mutableStateOf(tasks) }
@@ -93,7 +102,8 @@ fun ProjectDetailDialog(
                     project = project,
                     isOwner = isOwner,
                     onDismiss = onDismiss,
-                    onEditProject = { onEditProject(project) }
+                    onEditProject = { showEditProjectDialog = true },
+                    onDeleteProject = { showDeleteConfirmDialog = true }
                 )
 
                 // Scrollable Content
@@ -118,8 +128,9 @@ fun ProjectDetailDialog(
                     // Quick Actions
                     item {
                         QuickActionsSection(
+                            isOwner = isOwner,
                             onInviteMembers = { onInviteMembers(project) },
-                            onViewMembers = { onViewMembers(project) },
+                            onViewMembers = { showMembersDialog = true },
                             onAddTask = { showCreateTaskDialog = true }
                         )
                     }
@@ -139,7 +150,7 @@ fun ProjectDetailDialog(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Tasks ($currentCompletedTasks/$currentTotalTasks)",
+                                text = if (currentTotalTasks > 0) "Tasks ($currentCompletedTasks/$currentTotalTasks)" else "Tasks",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF1A1A1A)
@@ -159,7 +170,7 @@ fun ProjectDetailDialog(
                     if (displayTasks.isEmpty()) {
                         item {
                             Text(
-                                text = "No tasks yet. Tap 'Add Task' to start.",
+                                text = "No tasks",
                                 fontSize = 14.sp,
                                 color = Color.Gray,
                                 modifier = Modifier.padding(vertical = 8.dp)
@@ -173,7 +184,11 @@ fun ProjectDetailDialog(
                                 onStatusChange = { newStatus ->
                                     onTaskStatusChange(task, newStatus)
                                 },
-                                onAssignTask = { onAssignTask(task) }
+                                onAssignTask = { onAssignTask(task) },
+                                onDeleteTask = {
+                                    localTasks = localTasks.filter { it.id != task.id }
+                                    onTaskDeleted(task)
+                                }
                             )
                         }
                     }
@@ -197,6 +212,47 @@ fun ProjectDetailDialog(
                     onTaskCreated(newTask)
                     showCreateTaskDialog = false
                 }
+            )
+        }
+
+        if (showEditProjectDialog) {
+            EditProjectDialog(
+                project = project,
+                onDismiss = { showEditProjectDialog = false },
+                onConfirm = { updatedProject ->
+                    onEditProject(updatedProject)
+                    showEditProjectDialog = false
+                }
+            )
+        }
+
+        if (showDeleteConfirmDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteConfirmDialog = false },
+                title = { Text("Delete Project") },
+                text = { Text("Are you sure you want to delete '${project.title}'? This action cannot be undone.") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            onDeleteProject(project)
+                            showDeleteConfirmDialog = false
+                        }
+                    ) {
+                        Text("Delete", color = Color.Red)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteConfirmDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
+
+        if (showMembersDialog) {
+            MembersDialog(
+                members = members,
+                onDismiss = { showMembersDialog = false }
             )
         }
     }

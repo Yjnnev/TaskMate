@@ -28,6 +28,8 @@ class TaskMateRepository(
 
     fun observeUser(userId: String): Flow<UserEntity?> = userDao.observeUser(userId)
 
+    fun observeAllUsers(): Flow<List<UserEntity>> = userDao.observeAllUsers()
+
     // Project operations
     suspend fun createProject(project: ProjectEntity) {
         projectDao.insertProject(project)
@@ -44,6 +46,10 @@ class TaskMateRepository(
 
     suspend fun updateProject(project: ProjectEntity) {
         projectDao.updateProject(project)
+    }
+
+    suspend fun deleteProject(project: ProjectEntity) {
+        projectDao.deleteProject(project)
     }
 
     suspend fun joinProject(code: String, userId: String): Boolean {

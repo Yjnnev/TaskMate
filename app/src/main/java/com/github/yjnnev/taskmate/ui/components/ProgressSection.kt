@@ -78,7 +78,7 @@ fun ProgressSection(
             ) {
                 StatItem(
                     label = "Tasks",
-                    value = "${project.completedTasks}/${project.totalTasks}"
+                    value = if (project.totalTasks > 0) "${project.completedTasks}/${project.totalTasks}" else "No tasks"
                 )
                 StatItem(
                     label = "Members",

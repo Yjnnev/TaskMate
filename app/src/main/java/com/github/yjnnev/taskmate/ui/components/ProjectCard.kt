@@ -227,7 +227,7 @@ fun ProjectCard(
                         )
 
                         Text(
-                            text = "${project.completedTasks}/${project.totalTasks} Tasks",
+                            text = if (project.totalTasks > 0) "${project.completedTasks}/${project.totalTasks} Tasks" else "No tasks",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color(0xFF1A1A1A),
