@@ -80,50 +80,67 @@ fun BottomNav(
                                         modifier = Modifier
                                             .size(36.dp)
                                             .clip(CircleShape)
-                                            .background(Color(0xFF102A43).copy(alpha = 0.1f)),
+                                            .background(Color(0xFF4F5DE8).copy(alpha = 0.15f)),
                                         contentAlignment = Alignment.Center
                                     ) {
+                                        if (screen.iconVector != null) {
+                                            Icon(
+                                                imageVector = screen.iconVector,
+                                                contentDescription = screen.title,
+                                                modifier = Modifier.size(22.dp),
+                                                tint = Color(0xFF4F5DE8)
+                                            )
+                                        } else {
+                                            Icon(
+                                                painter = painterResource(
+                                                    id = screen.iconRes ?: R.drawable.ic_ghost
+                                                ),
+                                                contentDescription = screen.title,
+                                                modifier = Modifier.size(22.dp),
+                                                tint = Color(0xFF4F5DE8)
+                                            )
+                                        }
+                                    }
+                                } else {
+                                    if (screen.iconVector != null) {
+                                        Icon(
+                                            imageVector = screen.iconVector,
+                                            contentDescription = screen.title,
+                                            modifier = Modifier.size(24.dp),
+                                            tint = Color(0xFF94A3B8)
+                                        )
+                                    } else {
                                         Icon(
                                             painter = painterResource(
                                                 id = screen.iconRes ?: R.drawable.ic_ghost
                                             ),
                                             contentDescription = screen.title,
-                                            modifier = Modifier.size(20.dp),
-                                            tint = Color(0xFF102A43)
+                                            modifier = Modifier.size(24.dp),
+                                            tint = Color(0xFF94A3B8)
                                         )
                                     }
-                                } else {
-
-                                    Icon(
-                                        painter = painterResource(
-                                            id = screen.iconRes ?: R.drawable.ic_ghost
-                                        ),
-                                        contentDescription = screen.title,
-                                        modifier = Modifier.size(22.dp),
-                                        tint = Color(0xFF9CA3AF)
-                                    )
                                 }
                             }
                         },
                         label = {
                             Text(
                                 text = screen.title,
-                                fontSize = if (isSelected) 12.sp else 11.sp,
+                                fontSize = 12.sp,
                                 fontWeight = if (isSelected)
-                                    FontWeight.SemiBold
+                                    FontWeight.Bold
                                 else
-                                    FontWeight.Normal,
+                                    FontWeight.Medium,
                                 color = if (isSelected)
-                                    Color(0xFF102A43)
+                                    Color(0xFF4F5DE8)
                                 else
-                                    Color(0xFF9CA3AF)
+                                    Color(0xFF94A3B8)
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = Color.Transparent,
-                            selectedTextColor = Color(0xFF102A43),
+                            selectedTextColor = Color(0xFF4F5DE8),
                             unselectedIconColor = Color.Transparent,
-                            unselectedTextColor = Color(0xFF9CA3AF),
+                            unselectedTextColor = Color(0xFF94A3B8),
                             indicatorColor = Color.Transparent
                         ),
                         modifier = Modifier.padding(horizontal = 4.dp)

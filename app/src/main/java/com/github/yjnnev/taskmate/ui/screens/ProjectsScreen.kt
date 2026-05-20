@@ -68,15 +68,15 @@ fun ProjectsScreenContainer(
             }
         } else if (activeProjects.isEmpty()) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
                 EmptyState(
                     title = "No Active Projects",
                     subtitle = "Start by creating your first project to manage tasks.",
-                    buttonText = "Create Project",
-                    iconRes = R.drawable.ic_ghost,
-                    onActionClick = { showCreateDialog = true }
+                    iconRes = R.drawable.folder_open,
                 )
             }
         } else {

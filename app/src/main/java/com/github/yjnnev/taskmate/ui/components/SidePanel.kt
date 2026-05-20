@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -51,13 +53,16 @@ fun SidePanel(
         // Panel content
         Surface(
             modifier = Modifier
+                .statusBarsPadding()
+                .navigationBarsPadding()
                 .fillMaxHeight()
-                .fillMaxWidth(0.8f)
+                .fillMaxWidth(0.85f)
                 .align(Alignment.CenterEnd)
                 .clickable { /* Prevent click-through */ },
             shape = RoundedCornerShape(topStart = 32.dp, bottomStart = 32.dp),
             color = Color.White,
-            shadowElevation = 16.dp
+            shadowElevation = 24.dp,
+            tonalElevation = 4.dp
         ) {
             Column(
                 modifier = Modifier

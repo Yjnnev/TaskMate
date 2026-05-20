@@ -39,14 +39,15 @@ fun TasksScreen(
     val tasks by viewModel.allTasks.collectAsState()
     var showCreateTaskDialog by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
         if (tasks.isEmpty()) {
             EmptyState(
                 title = "No Tasks Yet",
-                subtitle = "Your daily tasks will appear here. Start by creating a new one!",
-                buttonText = "Add Task",
-                iconRes = R.drawable.ic_ghost,
-                onActionClick = { showCreateTaskDialog = true }
+                subtitle = "You’re all caught up!",
+                iconRes = R.drawable.ic_checkmark,
             )
         } else {
             LazyColumn(
@@ -63,48 +64,6 @@ fun TasksScreen(
                     )
                 }
             }
-        }
-
-        // Floating Action Button
-        FloatingActionButton(
-            onClick = { showCreateTaskDialog = true },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            containerColor = Color(0xFF102A43),
-            contentColor = Color.White
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Add Task")
-        }
-    }
-
-    if (showCreateTaskDialog) {
-        // Since it's a general task, we might need a way to select a project.
-        // For now, let's assume we can create a task without a project or with a default "Inbox" project.
-        // But the current CreateTaskDialog requires a projectId.
-        // Let's use the first project if available, or show a message.
-        val projects by viewModel.projects.collectAsState()
-        
-        if (projects.isNotEmpty()) {
-            CreateTaskDialog(
-                projectId = projects.first().id,
-                onDismiss = { showCreateTaskDialog = false },
-                onCreate = { newTask ->
-                    viewModel.createTask(newTask)
-                    showCreateTaskDialog = false
-                }
-            )
-        } else {
-            AlertDialog(
-                onDismissRequest = { showCreateTaskDialog = false },
-                title = { Text("No Projects Found") },
-                text = { Text("Please create a project first before adding tasks.") },
-                confirmButton = {
-                    TextButton(onClick = { showCreateTaskDialog = false }) {
-                        Text("OK")
-                    }
-                }
-            )
         }
     }
 }

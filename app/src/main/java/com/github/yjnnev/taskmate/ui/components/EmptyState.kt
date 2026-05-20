@@ -17,9 +17,7 @@ import androidx.compose.ui.unit.sp
 fun EmptyState(
     title: String,
     subtitle: String,
-    buttonText: String,
     iconRes: Int,
-    onActionClick: () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,

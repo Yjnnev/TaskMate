@@ -54,9 +54,7 @@ fun MainScreen() {
             startDestination = Screen.Tasks.route,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(
-                    top = innerPadding.calculateTopPadding()
-                )
+                .padding(innerPadding)
         ) {
             composable(Screen.Tasks.route) {
                 TasksScreen()

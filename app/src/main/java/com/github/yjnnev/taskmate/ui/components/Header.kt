@@ -1,12 +1,14 @@
 package com.github.yjnnev.taskmate.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -36,7 +38,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.painterResource
 import coil.compose.AsyncImage
+import com.github.yjnnev.taskmate.R
 import com.github.yjnnev.taskmate.data.UserManager
 
 @Composable
@@ -48,24 +52,72 @@ fun Header() {
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFF8FAFC),
+                        Color.White.copy(alpha = 0.8f)
+                    )
+                )
+            )
+            .padding(horizontal = 20.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // App Title & Subtitle
-        Column {
+        // App Logo and Name
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .border(
+                        width = 1.5.dp,
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.8f),
+                                Color.Transparent
+                            )
+                        ),
+                        shape = RoundedCornerShape(20.dp)
+                    ),
+                color = Color(0xFFF1F5F9),
+                tonalElevation = 10.dp,
+                shadowElevation = 8.dp
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    Color.White,
+                                    Color(0xFFE2E8F0)
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_taskmate),
+                        contentDescription = "TaskMate Logo",
+                        tint = Color.Unspecified,
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(RoundedCornerShape(14.dp)) // Square circle crop
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
             Text(
                 text = "TaskMate",
-                fontSize = 28.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF102A43)
-            )
-            Text(
-                text = "Academic Collaboration",
-                fontSize = 13.sp,
-                color = Color(0xFF64748B),
-                fontWeight = FontWeight.Medium,
-                letterSpacing = 0.5.sp
+                color = Color(0xFF1E293B),
+                letterSpacing = (-0.5).sp
             )
         }
 

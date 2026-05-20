@@ -1,6 +1,9 @@
 package com.github.yjnnev.taskmate.ui.navigation
 
 import androidx.annotation.DrawableRes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.github.yjnnev.taskmate.R
 
@@ -10,8 +13,8 @@ sealed class Screen(
     @DrawableRes val iconRes: Int? = null,
     val iconVector: ImageVector? = null
 ) {
-    object Tasks : Screen("tasks", "Tasks", iconRes = R.drawable.ic_ghost)
-    object Projects : Screen("projects", "Projects", iconRes = R.drawable.ic_ghost)
+    object Tasks : Screen("tasks", "Tasks", iconVector = Icons.Outlined.CheckCircle)
+    object Projects : Screen("projects", "Projects", iconVector = Icons.Outlined.Folder)
     object Login : Screen("login", "Login")
 
     // Easy to add new screens:
