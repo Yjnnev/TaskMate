@@ -1,5 +1,6 @@
 package com.github.yjnnev.taskmate.ui.components
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
@@ -32,16 +32,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.github.yjnnev.taskmate.classes.User
 import com.github.yjnnev.taskmate.data.UserManager
+import com.github.yjnnev.taskmate.ui.navigation.Screen
 
 @Composable
 fun SidePanel(
     currentUser: User,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onNavigate: (String) -> Unit
 ) {
+    val context = LocalContext.current
+
     // Semi-transparent background overlay
     Box(
         modifier = Modifier
@@ -55,11 +61,11 @@ fun SidePanel(
             modifier = Modifier
                 .statusBarsPadding()
                 .navigationBarsPadding()
+                .padding(bottom = 72.dp) // Match BottomNav height to prevent overlap
                 .fillMaxHeight()
                 .fillMaxWidth(0.85f)
                 .align(Alignment.CenterEnd)
                 .clickable { /* Prevent click-through */ },
-            shape = RoundedCornerShape(topStart = 32.dp, bottomStart = 32.dp),
             color = Color.White,
             shadowElevation = 24.dp,
             tonalElevation = 4.dp
@@ -90,7 +96,13 @@ fun SidePanel(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // User Profile Section
-                UserProfileSection(currentUser = currentUser)
+                UserProfileSection(
+                    currentUser = currentUser,
+                    onClick = {
+                        onNavigate(Screen.Profile.route)
+                        onDismiss()
+                    }
+                )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
@@ -103,7 +115,10 @@ fun SidePanel(
                             icon = Icons.Outlined.Palette,
                             title = "Theme",
                             subtitle = "Customize your experience",
-                            onClick = { /* TODO: Theme settings */ }
+                            onClick = {
+                                onNavigate(Screen.Theme.route)
+                                onDismiss()
+                            }
                         )
                     }
 
@@ -112,16 +127,20 @@ fun SidePanel(
                             icon = Icons.Outlined.Person,
                             title = "Account",
                             subtitle = "Manage your profile",
-                            onClick = { /* TODO: Account settings */ }
+                            onClick = {
+                                onNavigate(Screen.Profile.route)
+                                onDismiss()
+                            }
                         )
                     }
-
                     item {
                         SidePanelMenuItem(
                             icon = Icons.Outlined.Settings,
                             title = "Settings",
                             subtitle = "App preferences",
-                            onClick = { /* TODO: Settings */ }
+                            onClick = {
+                                Toast.makeText(context, "Coming Soon", Toast.LENGTH_SHORT).show()
+                            }
                         )
                     }
 
@@ -130,7 +149,9 @@ fun SidePanel(
                             icon = Icons.Outlined.SwapHoriz,
                             title = "Switch Account",
                             subtitle = "Use a different account",
-                            onClick = { /* TODO: Switch account */ }
+                            onClick = {
+                                Toast.makeText(context, "Coming Soon", Toast.LENGTH_SHORT).show()
+                            }
                         )
                     }
 

@@ -1,10 +1,12 @@
 package com.github.yjnnev.taskmate.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,6 +26,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,9 +37,21 @@ import com.github.yjnnev.taskmate.classes.User
 import com.github.yjnnev.taskmate.data.UserManager
 
 @Composable
-fun UserProfileSection(currentUser: User) {
+fun UserProfileSection(
+    currentUser: User,
+    onClick: () -> Unit = {}
+) {
+    val context = LocalContext.current
+    
+    // Helper to resolve icon resource name to ID
+    val iconResId = currentUser.profilePictureUrl?.let {
+        context.resources.getIdentifier(it, "drawable", context.packageName)
+    } ?: 0
+
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         color = Color(0xFFF8FAFC)
     ) {
@@ -45,37 +61,58 @@ fun UserProfileSection(currentUser: User) {
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Large Avatar
-            if (currentUser.profilePictureUrl != null) {
-                AsyncImage(
-                    model = currentUser.profilePictureUrl,
-                    contentDescription = "Profile Picture",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    Color(0xFF1E88E5),
-                                    Color(0xFF1565C0)
-                                )
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = UserManager.getInitials(currentUser.name),
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 32.sp
+            // Avatar Section
+            Box(modifier = Modifier.size(80.dp)) {
+                if (iconResId != 0) {
+                    // Internal Icon
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape),
+                        color = Color(0xFFF1F5F9)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = iconResId),
+                            contentDescription = "Profile Picture",
+                            tint = Color.Unspecified,
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxSize()
+                        )
+                    }
+                } else if (currentUser.profilePictureUrl != null) {
+                    // External URL
+                    AsyncImage(
+                        model = currentUser.profilePictureUrl,
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
                     )
+                } else {
+                    // Initials
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                            .background(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(
+                                        Color(0xFF1E88E5),
+                                        Color(0xFF1565C0)
+                                    )
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = UserManager.getInitials(currentUser.name),
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 32.sp
+                        )
+                    }
                 }
             }
 
@@ -112,7 +149,7 @@ fun UserProfileSection(currentUser: User) {
                 ) {
                     Icon(
                         imageVector = when (currentUser.authProvider) {
-                            AuthProvider.GOOGLE -> Icons.Outlined.Email // Replace with Google icon if available
+                            AuthProvider.GOOGLE -> Icons.Outlined.Email
                             AuthProvider.EMAIL -> Icons.Outlined.Email
                         },
                         contentDescription = null,

@@ -166,6 +166,7 @@ class TaskMateViewModel(
             id = id,
             name = name,
             email = email,
+            password = password,
             username = username,
             profilePictureUrl = profilePictureUrl,
             authProvider = authProvider
@@ -177,6 +178,7 @@ class TaskMateViewModel(
             id = id,
             name = name,
             email = email,
+            password = password,
             username = username,
             profilePictureUrl = profilePictureUrl,
             authProvider = authProvider,

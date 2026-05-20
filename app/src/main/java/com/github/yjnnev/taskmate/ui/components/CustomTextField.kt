@@ -26,7 +26,7 @@ fun CustomTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    keyboardType: KeyboardType,
+    keyboardType: KeyboardType = KeyboardType.Text,
     isPassword: Boolean = false
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {

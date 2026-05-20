@@ -14,6 +14,7 @@ object SampleData {
             id = "user_1",
             name = "Axel Bro",
             email = "axel@example.com",
+            password = "password",
             username = "Axel",
             authProvider = AuthProvider.EMAIL
         ),
@@ -21,6 +22,7 @@ object SampleData {
             id = "user_2",
             name = "CJ Magdael",
             email = "cjdost@example.com",
+            password = "password",
             username = "CJ Dost",
             authProvider = AuthProvider.GOOGLE
         ),
@@ -28,6 +30,7 @@ object SampleData {
             id = "user_3",
             name = "Bob Smith",
             email = "bob@example.com",
+            password = "password",
             username = "bobsmith",
             authProvider = AuthProvider.EMAIL
         )
@@ -76,6 +79,7 @@ object SampleData {
                     id = user.id,
                     name = user.name,
                     email = user.email,
+                    password = user.password,
                     username = user.username,
                     profilePictureUrl = user.profilePictureUrl,
                     authProvider = user.authProvider,

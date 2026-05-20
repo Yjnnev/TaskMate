@@ -32,6 +32,7 @@ object UserManager {
                     id = "dummy_id",
                     name = "Test User",
                     email = dummyEmail,
+                    password = "test123",
                     username = "testuser",
                     profilePictureUrl = null,
                     authProvider = AuthProvider.EMAIL,
@@ -70,37 +71,59 @@ object UserManager {
     }
 
     suspend fun signInWithEmail(email: String, password: String): Boolean {
-        // Find user from SampleData or DB
-        val sampleUser = SampleData.users.find { it.email == email }
-        
-        // For testing, we use "password" as a global test password if it's a sample user
-        // or keep the "test123" for the dummy user.
-        if (email == "test@example.com" && password != "test123") return false
-        if (sampleUser != null && password != "password") return false
+        val trimmedEmail = email.trim()
+        val trimmedPassword = password.trim()
 
-        val userEntity = repository.getUserByEmail(email) ?: if (sampleUser != null) {
-            UserEntity(
-                id = sampleUser.id,
-                name = sampleUser.name,
-                email = sampleUser.email,
-                username = sampleUser.username,
-                profilePictureUrl = sampleUser.profilePictureUrl,
-                authProvider = sampleUser.authProvider,
-                createdAt = System.currentTimeMillis(),
-                lastLoginAt = System.currentTimeMillis()
-            )
-        } else {
-            UserEntity(
-                id = "user_${System.currentTimeMillis()}",
-                name = email.substringBefore("@"),
-                email = email,
-                username = email.substringBefore("@"),
-                profilePictureUrl = null,
-                authProvider = AuthProvider.EMAIL,
-                createdAt = System.currentTimeMillis(),
-                lastLoginAt = System.currentTimeMillis()
-            )
+        // 1. Check if user exists in Database
+        var userEntity = repository.getUserByEmail(trimmedEmail)
+
+        // 2. If not in DB, check SampleData
+        if (userEntity == null) {
+            val sampleUser = SampleData.users.find { it.email.equals(trimmedEmail, ignoreCase = true) }
+            if (sampleUser != null) {
+                userEntity = UserEntity(
+                    id = sampleUser.id,
+                    name = sampleUser.name,
+                    email = sampleUser.email,
+                    password = sampleUser.password,
+                    username = sampleUser.username,
+                    profilePictureUrl = sampleUser.profilePictureUrl,
+                    authProvider = sampleUser.authProvider,
+                    createdAt = System.currentTimeMillis(),
+                    lastLoginAt = System.currentTimeMillis()
+                )
+                repository.createOrUpdateUser(userEntity)
+            }
         }
+
+        // 3. If still null, user does not exist
+        if (userEntity == null) return false
+
+        // 4. Validate password
+        if (userEntity.password != trimmedPassword) return false
+
+        _currentUserId.value = userEntity.id
+        sharedPrefs.edit().putString("logged_in_user_id", userEntity.id).apply()
+        return true
+    }
+
+    suspend fun signUp(name: String, email: String, username: String, password: String): Boolean {
+        // Check if user already exists
+        if (repository.getUserByEmail(email) != null || SampleData.users.any { it.email == email }) {
+            return false
+        }
+
+        val userEntity = UserEntity(
+            id = "user_${System.currentTimeMillis()}",
+            name = name,
+            email = email,
+            password = password,
+            username = username,
+            profilePictureUrl = null,
+            authProvider = AuthProvider.EMAIL,
+            createdAt = System.currentTimeMillis(),
+            lastLoginAt = System.currentTimeMillis()
+        )
         
         repository.createOrUpdateUser(userEntity)
         _currentUserId.value = userEntity.id
@@ -114,6 +137,17 @@ object UserManager {
         sharedPrefs.edit().putString("logged_in_user_id", googleUser.id).apply()
     }
 
+    suspend fun updateUserProfile(name: String, username: String, profilePictureUrl: String?) {
+        val userId = _currentUserId.value ?: return
+        val currentEntity = repository.getUser(userId) ?: return
+        val updatedEntity = currentEntity.copy(
+            name = name,
+            username = username,
+            profilePictureUrl = profilePictureUrl
+        )
+        repository.createOrUpdateUser(updatedEntity)
+    }
+
     fun signOut() {
         _currentUserId.value = null
         sharedPrefs.edit().remove("logged_in_user_id").apply()
@@ -125,6 +159,7 @@ object UserManager {
             id = id,
             name = name,
             email = email,
+            password = password,
             username = username,
             profilePictureUrl = profilePictureUrl,
             authProvider = authProvider

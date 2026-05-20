@@ -17,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import com.github.yjnnev.taskmate.data.UserManager
 import com.github.yjnnev.taskmate.ui.screens.LoginScreen
+import com.github.yjnnev.taskmate.ui.screens.SignUpScreen
 import com.github.yjnnev.taskmate.ui.screens.MainScreen
 import com.github.yjnnev.taskmate.ui.screens.SplashScreen
 import com.github.yjnnev.taskmate.ui.theme.NavyDark
@@ -48,7 +49,18 @@ class MainActivity : ComponentActivity() {
                     if (currentUserId != null || !isOnline) {
                         MainScreen()
                     } else {
-                        LoginScreen()
+                        var isSignUp by remember { mutableStateOf(false) }
+                        if (isSignUp) {
+                            SignUpScreen(
+                                onBackToLogin = { isSignUp = false },
+                                onSignUpSuccess = { /* Success will trigger currentUserId change */ }
+                            )
+                        } else {
+                            LoginScreen(
+                                onLoginSuccess = { /* Success will trigger currentUserId change */ },
+                                onNavigateToSignUp = { isSignUp = true }
+                            )
+                        }
                     }
                 }
             }

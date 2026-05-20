@@ -38,15 +38,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import coil.compose.AsyncImage
 import com.github.yjnnev.taskmate.R
 import com.github.yjnnev.taskmate.data.UserManager
+import com.github.yjnnev.taskmate.classes.User
 
 @Composable
-fun Header() {
+fun Header(onNavigate: (String) -> Unit = {}) {
     val currentUser by UserManager.currentUser.collectAsState()
     var showSidePanel by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    // Helper to resolve icon resource name to ID
+    val iconResId = currentUser?.profilePictureUrl?.let {
+        context.resources.getIdentifier(it, "drawable", context.packageName)
+    } ?: 0
 
     Row(
         modifier = Modifier
@@ -88,15 +97,7 @@ fun Header() {
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    Color.White,
-                                    Color(0xFFE2E8F0)
-                                )
-                            )
-                        ),
+                        .fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -109,8 +110,6 @@ fun Header() {
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.width(12.dp))
 
             Text(
                 text = "TaskMate",
@@ -135,36 +134,57 @@ fun Header() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Avatar
-                if (currentUser?.profilePictureUrl != null) {
-                    AsyncImage(
-                        model = currentUser?.profilePictureUrl,
-                        contentDescription = "Profile Picture",
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(
-                                brush = Brush.linearGradient(
-                                    colors = listOf(
-                                        Color(0xFF1E88E5),
-                                        Color(0xFF1565C0)
-                                    )
-                                )
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = UserManager.getInitials(currentUser?.name ?: ""),
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
+                Box(modifier = Modifier.size(36.dp)) {
+                    if (iconResId != 0) {
+                        // Internal Icon
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            color = Color(0xFFF1F5F9)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = iconResId),
+                                contentDescription = "Profile Picture",
+                                tint = Color.Unspecified,
+                                modifier = Modifier
+                                    .padding(6.dp)
+                                    .fillMaxSize()
+                            )
+                        }
+                    } else if (currentUser?.profilePictureUrl != null) {
+                        // External URL
+                        AsyncImage(
+                            model = currentUser?.profilePictureUrl,
+                            contentDescription = "Profile Picture",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
                         )
+                    } else {
+                        // Initials
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                                .background(
+                                    brush = Brush.linearGradient(
+                                        colors = listOf(
+                                            Color(0xFF1E88E5),
+                                            Color(0xFF1565C0)
+                                        )
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = UserManager.getInitials(currentUser?.name ?: ""),
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                        }
                     }
                 }
 
@@ -193,10 +213,11 @@ fun Header() {
     }
 
     // Side Panel
-    if (showSidePanel && currentUser != null) {
+    if (showSidePanel) {
         SidePanel(
-            currentUser = currentUser!!,
-            onDismiss = { showSidePanel = false }
+            currentUser = currentUser ?: User(name = "Guest"),
+            onDismiss = { showSidePanel = false },
+            onNavigate = onNavigate
         )
     }
 }

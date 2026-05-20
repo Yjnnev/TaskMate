@@ -10,6 +10,7 @@ data class UserEntity(
     val id: String,
     val name: String,
     val email: String,
+    val password: String,
     val username: String,
     val profilePictureUrl: String?,
     val authProvider: AuthProvider,
