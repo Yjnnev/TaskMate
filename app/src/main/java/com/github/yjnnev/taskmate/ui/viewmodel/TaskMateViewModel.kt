@@ -21,11 +21,40 @@ class TaskMateViewModel(
 
     val currentUser = UserManager.currentUser
 
-    val projects: StateFlow<List<Project>> = currentUser
-        .flatMapLatest { user ->
+    init {
+        viewModelScope.launch {
+            // Seed sample data if TaskMate project is missing
+            if (repository.getProject("proj_1") == null) {
+                SampleData.seedDatabase(repository)
+            }
+        }
+    }
+
+    val projects: StateFlow<List<Project>> = combine(
+        currentUser,
+        repository.observeAllUsers()
+    ) { user, allUsers -> user to allUsers }
+        .flatMapLatest { (user, allUsers) ->
             if (user != null) {
-                repository.observeUserProjects(user.id).map { entities ->
-                    entities.map { it.toProject(user) }
+                repository.observeUserProjects(user.id).flatMapLatest { entities ->
+                    if (entities.isEmpty()) return@flatMapLatest flowOf(emptyList())
+
+                    val projectFlows = entities.map { entity ->
+                        val ownerEntity = allUsers.find { it.id == entity.ownerId }
+                        val owner = ownerEntity?.toUser() ?: user
+                        
+                        val counts = repository.observeTaskCounts(entity.id)
+                        val memberCountFlow = repository.observeMemberCount(entity.id)
+                        
+                        combine(counts.first, counts.second, memberCountFlow) { completed, total, members ->
+                            entity.toProject(owner).copy(
+                                completedTasks = completed,
+                                totalTasks = total,
+                                memberCount = members
+                            )
+                        }
+                    }
+                    combine(projectFlows) { it.toList() }
                 }
             } else {
                 flowOf(emptyList())

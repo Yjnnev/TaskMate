@@ -79,6 +79,10 @@ class TaskMateRepository(
         return projectDao.getProjectById(projectId)
     }
 
+    suspend fun getTotalProjectCount(): Int {
+        return projectDao.getProjectCount()
+    }
+
     // Task operations
     suspend fun createTask(task: TaskEntity) {
         taskDao.insertTask(task)
