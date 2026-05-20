@@ -11,6 +11,7 @@ data class ProjectEntity(
     val title: String,
     val description: String,
     val category: ProjectCategory,
+    val code: String,
     val ownerId: String,
     val createdAt: Long,
     val updatedAt: Long

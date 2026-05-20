@@ -23,6 +23,7 @@ import com.github.yjnnev.taskmate.ui.components.ProjectCard
 import com.github.yjnnev.taskmate.ui.components.ButtonRow
 import com.github.yjnnev.taskmate.ui.components.ProjectsList
 import com.github.yjnnev.taskmate.ui.dialogs.ProjectDetailDialog
+import com.github.yjnnev.taskmate.ui.dialogs.JoinProjectDialog
 import com.github.yjnnev.taskmate.ui.viewmodel.TaskMateViewModel
 import com.github.yjnnev.taskmate.R
 
@@ -32,10 +33,12 @@ fun ProjectsScreenContainer(
     viewModel: TaskMateViewModel = viewModel()
 ) {
     var showCreateDialog by remember { mutableStateOf(false) }
+    var showJoinDialog by remember { mutableStateOf(false) }
     var selectedProject by remember { mutableStateOf<Project?>(null) }
 
     val currentUser by viewModel.currentUser.collectAsState()
     val activeProjects by viewModel.projects.collectAsState()
+    val isSyncing by viewModel.isSyncing.collectAsState()
 
     Column(
         modifier = Modifier
@@ -46,15 +49,23 @@ fun ProjectsScreenContainer(
 
         // Button row - always visible with equal sizes
         ButtonRow(
-            onSync = { /* TODO: Sync */ },
+            onSync = { if (!isSyncing) viewModel.seedData() },
             onNewProject = { showCreateDialog = true },
-            onJoinProject = { /* TODO: Join */ }
+            onJoinProject = { showJoinDialog = true }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Content - either empty state or projects list
-        if (activeProjects.isEmpty()) {
+        if (isSyncing) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
+        } else if (activeProjects.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -83,6 +94,21 @@ fun ProjectsScreenContainer(
             onCreate = { project ->
                 viewModel.createProject(project)
                 showCreateDialog = false
+            }
+        )
+    }
+
+    if (showJoinDialog) {
+        JoinProjectDialog(
+            currentUser = currentUser,
+            onDismiss = { showJoinDialog = false },
+            onJoin = { code, callback ->
+                viewModel.joinProject(code) { success ->
+                    callback(success)
+                    if (success) {
+                        showJoinDialog = false
+                    }
+                }
             }
         )
     }
@@ -118,11 +144,4 @@ fun ProjectsScreenContainer(
             )
         }
     }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true, showSystemUi = false)
-@Composable
-fun ProjectsScreenPreview() {
-    ProjectsScreenContainer()
 }

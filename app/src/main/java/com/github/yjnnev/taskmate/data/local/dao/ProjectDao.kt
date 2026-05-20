@@ -18,6 +18,9 @@ interface ProjectDao {
     @Query("SELECT * FROM projects WHERE id = :projectId")
     suspend fun getProjectById(projectId: String): ProjectEntity?
 
+    @Query("SELECT * FROM projects WHERE code = :code")
+    suspend fun getProjectByCode(code: String): ProjectEntity?
+
     @Query("SELECT * FROM projects WHERE ownerId = :userId")
     fun observeProjectsByOwner(userId: String): Flow<List<ProjectEntity>>
 

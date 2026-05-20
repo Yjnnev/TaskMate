@@ -109,61 +109,57 @@ fun ProjectDetailHeader(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Owner Info and Project Code
+        // Owner Info
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(project.category.color),
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(CircleShape)
-                        .background(project.category.color),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = project.owner.username.take(1).uppercase(),
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Owned by ${project.owner.username}",
-                    fontSize = 13.sp,
-                    color = Color(0xFF6B7280)
+                    text = project.owner.username.take(1).uppercase(),
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Owned by ${project.owner.username}",
+                fontSize = 13.sp,
+                color = Color(0xFF6B7280)
+            )
+        }
 
-            // Project Join Code
-            Surface(
-                color = project.category.color.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(8.dp)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Project Join Code
+        Surface(
+            color = project.category.color.copy(alpha = 0.1f),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.VpnKey,
-                        contentDescription = "Project Code",
-                        modifier = Modifier.size(14.dp),
-                        tint = project.category.color
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = project.code,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = project.category.color,
-                        letterSpacing = 1.sp
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.VpnKey,
+                    contentDescription = "Project Code",
+                    modifier = Modifier.size(14.dp),
+                    tint = project.category.color
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "Project Code: ${project.code}",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = project.category.color,
+                    letterSpacing = 1.sp
+                )
             }
         }
     }

@@ -6,6 +6,7 @@ import com.github.yjnnev.taskmate.classes.Project
 import com.github.yjnnev.taskmate.classes.Task
 import com.github.yjnnev.taskmate.classes.User
 import com.github.yjnnev.taskmate.data.UserManager
+import com.github.yjnnev.taskmate.data.SampleData
 import com.github.yjnnev.taskmate.data.local.entity.ProjectEntity
 import com.github.yjnnev.taskmate.data.local.entity.TaskEntity
 import com.github.yjnnev.taskmate.data.repository.TaskMateRepository
@@ -55,6 +56,31 @@ class TaskMateViewModel(
         }
     }
 
+    fun joinProject(code: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val user = currentUser.value
+            if (user != null) {
+                val success = repository.joinProject(code, user.id)
+                onResult(success)
+            } else {
+                onResult(false)
+            }
+        }
+    }
+
+    private val _isSyncing = MutableStateFlow(false)
+    val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
+
+    fun seedData() {
+        viewModelScope.launch {
+            _isSyncing.value = true
+            // Simulate network delay
+            kotlinx.coroutines.delay(1500)
+            SampleData.seedDatabase(repository)
+            _isSyncing.value = false
+        }
+    }
+
     fun createTask(task: Task) {
         viewModelScope.launch {
             repository.createTask(task.toEntity())
@@ -74,6 +100,7 @@ class TaskMateViewModel(
             title = title,
             description = description,
             category = category,
+            code = code,
             owner = owner,
             createdAt = createdAt,
             updatedAt = updatedAt
@@ -86,6 +113,7 @@ class TaskMateViewModel(
             title = title,
             description = description,
             category = category,
+            code = code,
             ownerId = owner.id,
             createdAt = createdAt,
             updatedAt = updatedAt

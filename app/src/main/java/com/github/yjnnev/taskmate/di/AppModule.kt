@@ -8,14 +8,18 @@ import com.github.yjnnev.taskmate.data.repository.TaskMateRepository
 object AppModule {
     private var database: AppDatabase? = null
     private var repository: TaskMateRepository? = null
+    private lateinit var applicationContext: Context
 
     fun provide(context: Context) {
+        this.applicationContext = context.applicationContext
         if (database == null) {
             database = Room.databaseBuilder(
-                context.applicationContext,
+                this.applicationContext,
                 AppDatabase::class.java,
                 "taskmate_db"
-            ).build()
+            )
+                .fallbackToDestructiveMigration()
+                .build()
         }
         if (repository == null) {
             val db = database!!
@@ -30,5 +34,10 @@ object AppModule {
 
     fun getRepository(): TaskMateRepository {
         return repository ?: throw IllegalStateException("AppModule not initialized")
+    }
+
+    fun getContext(): Context {
+        if (!::applicationContext.isInitialized) throw IllegalStateException("AppModule not initialized")
+        return applicationContext
     }
 }

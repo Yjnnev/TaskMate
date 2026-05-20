@@ -4,6 +4,7 @@ import com.github.yjnnev.taskmate.data.local.dao.*
 import com.github.yjnnev.taskmate.data.local.entity.*
 import com.github.yjnnev.taskmate.classes.TaskStatus
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 class TaskMateRepository(
     private val userDao: UserDao,
@@ -43,6 +44,25 @@ class TaskMateRepository(
 
     suspend fun updateProject(project: ProjectEntity) {
         projectDao.updateProject(project)
+    }
+
+    suspend fun joinProject(code: String, userId: String): Boolean {
+        val project = projectDao.getProjectByCode(code) ?: return false
+        
+        // Check if already a member using getMember
+        val existingMember = projectMemberDao.getMember(project.id, userId)
+        
+        if (existingMember != null) return true // Or handle as already joined
+
+        projectMemberDao.insertMember(
+            ProjectMemberEntity(
+                projectId = project.id,
+                userId = userId,
+                role = "MEMBER",
+                joinedAt = System.currentTimeMillis()
+            )
+        )
+        return true
     }
 
     fun observeUserProjects(userId: String): Flow<List<ProjectEntity>> {
