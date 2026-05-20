@@ -16,13 +16,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.github.yjnnev.taskmate.classes.User
+import com.github.yjnnev.taskmate.data.repository.TaskMateRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JoinProjectDialog(
     currentUser: User?,
     onDismiss: () -> Unit,
-    onJoin: (String, (Boolean) -> Unit) -> Unit
+    onJoin: (String, (TaskMateRepository.JoinResult) -> Unit) -> Unit
 ) {
     var joinCode by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
@@ -54,6 +55,7 @@ fun JoinProjectDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // ... existing header ...
                     Text(
                         text = "Join Project",
                         fontSize = 20.sp,
@@ -128,10 +130,16 @@ fun JoinProjectDialog(
                     onClick = {
                         isLoading = true
                         errorMessage = null
-                        onJoin(joinCode) { success ->
+                        onJoin(joinCode) { result ->
                             isLoading = false
-                            if (!success) {
-                                errorMessage = "Invalid code or project not found."
+                            when (result) {
+                                TaskMateRepository.JoinResult.SUCCESS -> {} // Parent will dismiss
+                                TaskMateRepository.JoinResult.ALREADY_JOINED -> {
+                                    errorMessage = "Project already joined"
+                                }
+                                TaskMateRepository.JoinResult.NOT_FOUND -> {
+                                    errorMessage = "Invalid code or project not found."
+                                }
                             }
                         }
                     },

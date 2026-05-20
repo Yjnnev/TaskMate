@@ -26,4 +26,10 @@ interface ProjectMemberDao {
 
     @Query("SELECT * FROM project_members WHERE projectId = :projectId AND userId = :userId")
     suspend fun getMember(projectId: String, userId: String): ProjectMemberEntity?
+
+    @Query("SELECT * FROM project_members WHERE projectId = :projectId AND userId != :currentOwnerId ORDER BY joinedAt ASC LIMIT 1")
+    suspend fun getNextPotentialOwner(projectId: String, currentOwnerId: String): ProjectMemberEntity?
+
+    @Query("SELECT COUNT(*) FROM project_members WHERE projectId = :projectId")
+    suspend fun getMembersCount(projectId: String): Int
 }

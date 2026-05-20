@@ -52,13 +52,15 @@ class TaskMateRepository(
         projectDao.deleteProject(project)
     }
 
-    suspend fun joinProject(code: String, userId: String): Boolean {
-        val project = projectDao.getProjectByCode(code) ?: return false
+    enum class JoinResult {
+        SUCCESS, ALREADY_JOINED, NOT_FOUND
+    }
+
+    suspend fun joinProject(code: String, userId: String): JoinResult {
+        val project = projectDao.getProjectByCode(code) ?: return JoinResult.NOT_FOUND
         
-        // Check if already a member using getMember
         val existingMember = projectMemberDao.getMember(project.id, userId)
-        
-        if (existingMember != null) return true // Or handle as already joined
+        if (existingMember != null) return JoinResult.ALREADY_JOINED
 
         projectMemberDao.insertMember(
             ProjectMemberEntity(
@@ -68,7 +70,28 @@ class TaskMateRepository(
                 joinedAt = System.currentTimeMillis()
             )
         )
-        return true
+        return JoinResult.SUCCESS
+    }
+
+    suspend fun leaveProject(projectId: String, userId: String) {
+        val project = projectDao.getProjectById(projectId) ?: return
+        val isOwner = project.ownerId == userId
+
+        if (isOwner) {
+            val nextOwner = projectMemberDao.getNextPotentialOwner(projectId, userId)
+            if (nextOwner != null) {
+                // Pass ownership to the next member who joined
+                projectDao.updateProject(project.copy(ownerId = nextOwner.userId))
+                projectMemberDao.insertMember(nextOwner.copy(role = "OWNER"))
+                projectMemberDao.removeMemberFromProject(projectId, userId)
+            } else {
+                // This case should be handled by the UI (showing delete dialog)
+                // but as a fallback/internal logic, delete if no one else
+                projectDao.deleteProject(project)
+            }
+        } else {
+            projectMemberDao.removeMemberFromProject(projectId, userId)
+        }
     }
 
     fun observeUserProjects(userId: String): Flow<List<ProjectEntity>> {

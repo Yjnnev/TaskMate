@@ -1,34 +1,29 @@
 package com.github.yjnnev.taskmate.ui.dialogs
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import coil.compose.AsyncImage
 import com.github.yjnnev.taskmate.classes.User
 import com.github.yjnnev.taskmate.ui.components.MemberItem
 
 @Composable
 fun MembersDialog(
     members: List<Pair<User, String>>,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onLeaveProject: () -> Unit
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -65,6 +60,22 @@ fun MembersDialog(
                     IconButton(onClick = onDismiss) {
                         Icon(imageVector = Icons.Default.Close, contentDescription = "Close")
                     }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Leave Project Button
+                Button(
+                    onClick = onLeaveProject,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Red.copy(alpha = 0.1f),
+                        contentColor = Color.Red
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = null
+                ) {
+                    Text("Leave Project", fontWeight = FontWeight.SemiBold)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

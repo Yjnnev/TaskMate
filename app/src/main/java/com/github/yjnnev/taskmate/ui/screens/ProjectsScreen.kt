@@ -25,6 +25,7 @@ import com.github.yjnnev.taskmate.ui.components.ProjectsList
 import com.github.yjnnev.taskmate.ui.dialogs.ProjectDetailDialog
 import com.github.yjnnev.taskmate.ui.dialogs.JoinProjectDialog
 import com.github.yjnnev.taskmate.ui.viewmodel.TaskMateViewModel
+import com.github.yjnnev.taskmate.data.repository.TaskMateRepository
 import com.github.yjnnev.taskmate.R
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -103,9 +104,9 @@ fun ProjectsScreenContainer(
             currentUser = currentUser,
             onDismiss = { showJoinDialog = false },
             onJoin = { code, callback ->
-                viewModel.joinProject(code) { success ->
-                    callback(success)
-                    if (success) {
+                viewModel.joinProject(code) { result ->
+                    callback(result)
+                    if (result == TaskMateRepository.JoinResult.SUCCESS) {
                         showJoinDialog = false
                     }
                 }
@@ -147,6 +148,13 @@ fun ProjectsScreenContainer(
                 },
                 onTaskStatusChange = { task, newStatus ->
                     viewModel.updateTaskStatus(task, newStatus)
+                },
+                onLeaveProject = { projectToLeave ->
+                    viewModel.leaveProject(projectToLeave.id) { success ->
+                        if (success) {
+                            selectedProject = null
+                        }
+                    }
                 }
             )
         }

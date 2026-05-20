@@ -111,12 +111,24 @@ class TaskMateViewModel(
         }
     }
 
-    fun joinProject(code: String, onResult: (Boolean) -> Unit) {
+    fun joinProject(code: String, onResult: (TaskMateRepository.JoinResult) -> Unit) {
         viewModelScope.launch {
             val user = currentUser.value
             if (user != null) {
-                val success = repository.joinProject(code, user.id)
-                onResult(success)
+                val result = repository.joinProject(code, user.id)
+                onResult(result)
+            } else {
+                onResult(TaskMateRepository.JoinResult.NOT_FOUND)
+            }
+        }
+    }
+
+    fun leaveProject(projectId: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val user = currentUser.value
+            if (user != null) {
+                repository.leaveProject(projectId, user.id)
+                onResult(true)
             } else {
                 onResult(false)
             }

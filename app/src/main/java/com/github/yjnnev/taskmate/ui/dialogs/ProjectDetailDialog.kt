@@ -59,6 +59,7 @@ fun ProjectDetailDialog(
     onTaskCreated: (Task) -> Unit = {},
     onTaskDeleted: (Task) -> Unit = {},
     onTaskStatusChange: (Task, TaskStatus) -> Unit = { _, _ -> },
+    onLeaveProject: (Project) -> Unit = {},
     members: List<Pair<User, String>> = emptyList()
 ) {
     var showAllTasks by remember { mutableStateOf(false) }
@@ -252,7 +253,16 @@ fun ProjectDetailDialog(
         if (showMembersDialog) {
             MembersDialog(
                 members = members,
-                onDismiss = { showMembersDialog = false }
+                onDismiss = { showMembersDialog = false },
+                onLeaveProject = {
+                    showMembersDialog = false
+                    if (isOwner && members.size <= 1) {
+                        showDeleteConfirmDialog = true
+                    } else {
+                        onLeaveProject(project)
+                        onDismiss()
+                    }
+                }
             )
         }
     }
